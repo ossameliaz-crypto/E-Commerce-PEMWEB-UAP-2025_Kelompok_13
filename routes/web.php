@@ -3,16 +3,6 @@
 use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
 
-/*
-|--------------------------------------------------------------------------
-| Web Routes (MASTER FILE)
-|--------------------------------------------------------------------------
-|
-| Ini adalah file rute lengkap untuk seluruh aplikasi Build-A-Teddy.
-| Semua halaman didaftarkan di sini.
-|
-*/
-
 // ==========================================
 // 1. HALAMAN PUBLIK (Customer)
 // ==========================================
@@ -44,7 +34,7 @@ Route::post('/cart/add-custom', function () {
 
 
 // ==========================================
-// 2. HALAMAN SELLER (Tantangan II)
+// 2. HALAMAN SELLER 
 // ==========================================
 
 // Form Daftar Toko
@@ -64,7 +54,7 @@ Route::get('/seller/dashboard', function () {
 
 
 // ==========================================
-// 3. HALAMAN ADMIN (Tantangan III)
+// 3. HALAMAN ADMIN 
 // ==========================================
 
 // Dashboard Admin
@@ -74,7 +64,7 @@ Route::get('/admin/dashboard', function () {
 
 
 // ==========================================
-// 4. HALAMAN AUTH & USER (Bawaan Laravel)
+// 4. HALAMAN AUTH & USER 
 // ==========================================
 
 // Dashboard User Biasa (Setelah Login)
@@ -89,6 +79,55 @@ Route::middleware('auth')->group(function () {
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
 
-// Load file auth bawaan (Login/Register logic)
-// PENTING: Jangan dihapus, ini biar halaman /login dan /register bisa dibuka
+Route::middleware(['auth', 'role:member'])->group(function () {
+    Route::get('/store/register', function () {
+        return view('seller.register');
+    })->name('store.register');
+
+    Route::post('/store/create', function () {
+        return redirect()->route('seller.dashboard'); 
+    })->name('store.create');
+
+    Route::get('/seller/dashboard', function () {
+        return view('seller.dashboard');
+    })->name('seller.dashboard');
+});
+
+// ==========================================
+// 3. HALAMAN ADMIN 
+// ==========================================
+Route::middleware(['auth', 'role:admin'])->group(function () {
+    Route::get('/admin/dashboard', function () {
+        return view('admin.dashboard');
+    })->name('admin.dashboard');
+});
+
+// 1. Checkout (Customer)
+
+Route::get('/checkout', function () {
+
+    return view('checkout');
+
+})->name('checkout');
+
+
+
+// 2. History (Customer)
+
+Route::get('/history', function () {
+
+    return view('history');
+
+})->name('history');
+
+
+
+// 3. Orders (Seller)
+
+Route::get('/seller/orders', function () {
+
+    return view('seller.orders');
+
+})->name('seller.orders');
+
 require __DIR__.'/auth.php';

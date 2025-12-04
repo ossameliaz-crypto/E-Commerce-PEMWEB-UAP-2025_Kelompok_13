@@ -12,7 +12,6 @@
 
     <div class="flex">
         
-        <!-- SIDEBAR -->
         <aside class="w-64 bg-white border-r border-gray-200 min-h-screen hidden md:block fixed">
             <div class="h-20 flex items-center px-8 border-b border-gray-100">
                 <span class="text-2xl mr-2">🧸</span>
@@ -37,9 +36,7 @@
             </nav>
         </aside>
 
-        <!-- MAIN CONTENT -->
         <main class="flex-1 md:ml-64 p-8">
-            <!-- Header -->
             <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-10 gap-4">
                 <div>
                     <h1 class="text-3xl font-extrabold text-gray-800">Daftar Produk</h1>
@@ -50,7 +47,6 @@
                 </button>
             </div>
 
-            <!-- TABLE CARD -->
             <div class="bg-white rounded-[2rem] shadow-sm border border-gray-100 overflow-hidden">
                 <div class="overflow-x-auto">
                     <table class="w-full text-left border-collapse">

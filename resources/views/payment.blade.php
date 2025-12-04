@@ -23,7 +23,6 @@
 </head>
 <body class="bg-orange-50/50 min-h-screen flex flex-col">
 
-    <!-- NAVBAR (Sama) -->
     <nav class="bg-white/90 backdrop-blur-md border-b border-orange-100 sticky top-0 z-50 shadow-sm">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex justify-between h-20 items-center">
@@ -50,7 +49,6 @@
          }">
 
         <div class="w-full max-w-lg bg-white rounded-[2.5rem] shadow-2xl overflow-hidden border border-orange-100 relative">
-            <!-- Header Card -->
             <div class="bg-gradient-to-r from-orange-500 to-red-500 p-8 text-center text-white relative overflow-hidden">
                 <div class="absolute top-0 right-0 w-32 h-32 bg-white opacity-10 rounded-full -mr-10 -mt-10"></div>
                 <h2 class="text-2xl font-bold tracking-wider">TeddyPay Gateway</h2>
@@ -58,7 +56,6 @@
             </div>
 
             <div class="p-8">
-                <!-- STEP 1: INPUT -->
                 <div x-show="step === 1" x-transition>
                     <label class="block text-gray-700 font-bold mb-3">Masukkan Kode Virtual Account</label>
                     <input type="text" x-model="vaCode" placeholder="8800xxxxxxx" 
@@ -69,13 +66,11 @@
                     <a href="{{ url('/') }}" class="block text-center mt-6 text-gray-400 text-sm hover:text-orange-500">Batal Transaksi</a>
                 </div>
 
-                <!-- STEP 2: LOADING -->
                 <div x-show="step === 2" class="flex flex-col items-center justify-center py-12" x-cloak>
                     <div class="loader mb-4"></div>
                     <p class="text-gray-500 font-bold animate-pulse">Memproses...</p>
                 </div>
 
-                <!-- STEP 3: CONFIRM -->
                 <div x-show="step === 3" x-cloak>
                     <div class="text-center mb-8">
                         <span class="text-gray-400 text-xs font-bold uppercase tracking-widest">Total Tagihan</span>
@@ -88,7 +83,6 @@
                     <button @click="payBill()" class="w-full bg-green-500 hover:bg-green-600 text-white font-bold py-4 rounded-2xl shadow-lg transition">Konfirmasi Bayar</button>
                 </div>
 
-                <!-- STEP 4: SUCCESS -->
                 <div x-show="step === 4" class="text-center py-8" x-cloak>
                     <div class="w-24 h-24 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6 text-5xl">✅</div>
                     <h2 class="text-2xl font-bold text-gray-800 mb-2">Pembayaran Sukses!</h2>

@@ -12,19 +12,16 @@
 
     <div class="max-w-5xl w-full bg-white rounded-[2.5rem] shadow-2xl overflow-hidden flex flex-col md:flex-row border border-orange-100">
         
-        <!-- LEFT: ILLUSTRATION -->
         <div class="md:w-1/2 bg-gradient-to-br from-orange-500 to-red-600 p-12 text-white flex flex-col justify-center relative overflow-hidden">
             <div class="relative z-10">
                 <span class="text-7xl mb-6 block drop-shadow-md">🏪</span>
                 <h2 class="text-4xl font-extrabold mb-4 leading-tight">Mulai Bisnis<br>Bonekamu!</h2>
                 <p class="text-orange-100 text-lg opacity-90">Gabung komunitas kreator dan jual karya unikmu ke ribuan mahasiswa.</p>
             </div>
-            <!-- Circles -->
             <div class="absolute top-0 right-0 w-64 h-64 bg-white opacity-10 rounded-full -mr-16 -mt-16"></div>
             <div class="absolute bottom-0 left-0 w-40 h-40 bg-white opacity-10 rounded-full -ml-10 -mb-10"></div>
         </div>
 
-        <!-- RIGHT: FORM -->
         <div class="md:w-1/2 p-12">
             <div class="flex justify-between items-center mb-8">
                 <h3 class="text-2xl font-extrabold text-gray-800">Form Buka Toko</h3>

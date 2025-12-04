@@ -4,10 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Lemari Boneka Saya - Build-A-Teddy</title>
-    <!-- Tailwind & Alpine -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
-    <!-- Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
     <style>
         body { font-family: 'Nunito', sans-serif; }
@@ -16,11 +14,9 @@
 </head>
 <body class="bg-orange-50/50 flex flex-col min-h-screen">
 
-    <!-- 1. NAVBAR (Sama dengan Homepage) -->
     <nav class="bg-white/90 backdrop-blur-md border-b border-orange-100 sticky top-0 z-50 shadow-sm">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex justify-between h-20 items-center">
-                <!-- Logo -->
                 <a href="{{ url('/') }}" class="flex items-center gap-2 group">
                     <span class="text-4xl group-hover:animate-bounce">🧸</span>
                     <div>
@@ -29,14 +25,12 @@
                     </div>
                 </a>
 
-                <!-- Menu Desktop -->
                 <div class="hidden md:flex space-x-8">
                     <a href="{{ url('/') }}" class="text-gray-600 hover:text-orange-600 font-bold transition border-b-2 border-transparent hover:border-orange-500 py-1">Beranda</a>
                     <a href="{{ route('workshop') }}" class="text-gray-600 hover:text-orange-600 font-bold transition border-b-2 border-transparent hover:border-orange-500 py-1">Workshop</a>
                     <a href="#" class="text-orange-600 font-bold border-b-2 border-orange-500 py-1">Lemari Saya</a>
                 </div>
 
-                <!-- Action Button -->
                 <div class="flex items-center gap-4">
                     <a href="{{ route('workshop') }}" class="bg-orange-100 text-orange-700 px-4 py-2 rounded-full font-bold hover:bg-orange-200 transition flex items-center gap-2">
                         <span>🛒</span> Beli Baru
@@ -46,10 +40,8 @@
         </div>
     </nav>
 
-    <!-- 2. MAIN CONTENT (Wardrobe Logic) -->
     <main class="flex-grow py-12 px-4 sm:px-6 lg:px-8"
           x-data="{ 
-            // --- DATA (Sama seperti sebelumnya) ---
             myBears: [
                 { id: 1, name: 'Si Coklat', type: 'coklat' },
                 { id: 2, name: 'Si Panda', type: 'panda' }
@@ -65,7 +57,6 @@
             ],
             activeBear: 'coklat', activeOutfit: 'none', activeAccessory: 'none',
 
-            // --- LOGIC WARNA ---
             get bearColor() {
                 if (this.activeBear === 'coklat') return '#8B4513';
                 if (this.activeBear === 'krem') return '#F5DEB3';
@@ -82,7 +73,6 @@
          
         <div class="max-w-6xl mx-auto">
             
-            <!-- Header Halaman -->
             <div class="text-center mb-10">
                 <h1 class="text-3xl font-extrabold text-gray-900">Lemari Koleksi 🧥</h1>
                 <p class="text-gray-500 mt-2">Mix and match semua item yang sudah kamu beli di sini.</p>
@@ -90,17 +80,13 @@
 
             <div class="grid grid-cols-1 md:grid-cols-12 gap-8 items-start">
                 
-                <!-- KOLOM KIRI: CERMIN AJAIB (Sticky) -->
                 <div class="md:col-span-5 lg:col-span-4 sticky top-28">
                     <div class="bg-white rounded-3xl p-6 shadow-xl border-4 border-orange-200 relative">
-                        <!-- Label -->
                         <div class="absolute -top-5 left-1/2 transform -translate-x-1/2 bg-orange-600 text-white px-6 py-2 rounded-full font-bold shadow-lg text-sm uppercase tracking-wide">
                             Preview Look
                         </div>
 
-                        <!-- CANVAS SVG -->
                         <div class="mt-4 relative w-full h-80 flex items-center justify-center bg-orange-50 rounded-2xl overflow-hidden border-2 border-dashed border-orange-300">
-                            <!-- LAYER 1: BASE -->
                             <svg width="220" height="280" viewBox="0 0 200 250" class="absolute z-10 transition-all duration-500">
                                 <circle cx="40" cy="50" r="25" :fill="bearColor" /><circle cx="40" cy="50" r="12" :fill="bearBellyColor" />
                                 <circle cx="160" cy="50" r="25" :fill="bearColor" /><circle cx="160" cy="50" r="12" :fill="bearBellyColor" />
@@ -115,17 +101,14 @@
                                 <path d="M 95 95 Q 100 100 105 95" stroke="#3E2723" stroke-width="2" fill="none" />
                             </svg>
 
-                            <!-- LAYER 2: OUTFIT -->
                             <div x-show="activeOutfit === 'kaos'" class="absolute z-20 top-[110px]" x-transition.enter><svg width="140" height="100" viewBox="0 0 140 100"><path d="M 40 10 L 100 10 L 120 40 L 100 50 L 90 30 L 90 90 L 50 90 L 50 30 L 40 50 L 20 40 Z" fill="#EF4444" stroke="#B91C1C" stroke-width="2"/><text x="70" y="60" font-size="20" text-anchor="middle" fill="white" font-weight="bold">UAP</text></svg></div>
                             <div x-show="activeOutfit === 'hoodie'" class="absolute z-20 top-[105px]" x-transition.enter><svg width="150" height="110" viewBox="0 0 150 110"><path d="M 45 5 L 105 5 L 130 40 L 110 55 L 100 35 L 100 100 L 50 100 L 50 35 L 40 55 L 20 40 Z" fill="#3B82F6" stroke="#1D4ED8" stroke-width="2"/><rect x="65" y="60" width="20" height="25" fill="#2563EB" rx="5" /></svg></div>
                             <div x-show="activeOutfit === 'dress'" class="absolute z-20 top-[110px]" x-transition.enter><svg width="140" height="120" viewBox="0 0 140 120"><path d="M 50 10 L 90 10 L 110 90 L 30 90 Z" fill="#EC4899" /><path d="M 30 90 Q 70 110 110 90" fill="#EC4899" /></svg></div>
 
-                            <!-- LAYER 3: ACCESSORY -->
                             <div x-show="activeAccessory === 'kacamata'" class="absolute z-30 top-[65px]" x-transition.enter><svg width="80" height="30" viewBox="0 0 80 30"><circle cx="20" cy="15" r="12" fill="#000" opacity="0.8" /><circle cx="60" cy="15" r="12" fill="#000" opacity="0.8" /><line x1="32" y1="15" x2="48" y2="15" stroke="#000" stroke-width="2" /></svg></div>
                             <div x-show="activeAccessory === 'topi'" class="absolute z-30 top-[-10px]" x-transition.enter><svg width="100" height="80" viewBox="0 0 100 80"><rect x="25" y="20" width="50" height="50" fill="#1F2937" /><rect x="10" y="65" width="80" height="10" fill="#1F2937" /><rect x="25" y="55" width="50" height="5" fill="#EF4444" /></svg></div>
                         </div>
 
-                        <!-- Action Buttons -->
                         <div class="mt-6 flex gap-3">
                             <button class="flex-1 bg-gray-900 text-white py-3 rounded-xl font-bold hover:bg-gray-800 transition shadow-lg flex items-center justify-center gap-2">
                                 <span>📸</span> Capture
@@ -137,10 +120,8 @@
                     </div>
                 </div>
 
-                <!-- KOLOM KANAN: RAK INVENTORY -->
                 <div class="md:col-span-7 lg:col-span-8 space-y-8 pl-0 md:pl-8">
                     
-                    <!-- Section 1: Boneka -->
                     <div class="bg-white p-6 rounded-3xl shadow-sm border border-orange-100">
                         <div class="flex justify-between items-center mb-4">
                             <h3 class="font-bold text-gray-800 flex items-center gap-2 text-lg">
@@ -157,7 +138,6 @@
                                     <span class="text-xs font-bold text-gray-700" x-text="bear.name"></span>
                                 </div>
                             </template>
-                            <!-- Upselling -->
                             <a href="{{ route('workshop') }}" class="rounded-2xl p-4 border-2 border-dashed border-gray-300 flex flex-col items-center justify-center text-gray-400 hover:bg-orange-50 hover:text-orange-500 hover:border-orange-300 transition h-32 group">
                                 <span class="text-3xl group-hover:scale-110 transition">+</span>
                                 <span class="text-xs font-bold mt-1">Beli Lagi</span>
@@ -165,7 +145,6 @@
                         </div>
                     </div>
 
-                    <!-- Section 2: Baju -->
                     <div class="bg-white p-6 rounded-3xl shadow-sm border border-orange-100">
                         <div class="flex justify-between items-center mb-4">
                             <h3 class="font-bold text-gray-800 flex items-center gap-2 text-lg">
@@ -174,11 +153,9 @@
                             <span class="text-xs text-gray-400 font-bold bg-gray-100 px-2 py-1 rounded-full" x-text="myOutfits.length + ' Item'"></span>
                         </div>
                         <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
-                            <!-- Lepas -->
                             <div @click="activeOutfit = 'none'" :class="activeOutfit === 'none' ? 'ring-2 ring-orange-500 bg-orange-50 shadow-md' : 'bg-gray-50 hover:bg-gray-100'" class="rounded-2xl p-4 cursor-pointer transition text-center flex flex-col items-center justify-center h-32 border border-transparent">
                                 <span class="text-2xl mb-2">❌</span><span class="text-xs font-bold text-gray-700">Lepas Baju</span>
                             </div>
-                            <!-- Items -->
                             <template x-for="outfit in myOutfits" :key="outfit.id">
                                 <div @click="activeOutfit = outfit.type" :class="activeOutfit === outfit.type ? 'ring-2 ring-orange-500 bg-orange-50 shadow-md transform scale-105' : 'bg-gray-50 hover:bg-gray-100'" class="rounded-2xl p-4 cursor-pointer transition text-center flex flex-col items-center justify-center h-32 border border-transparent">
                                     <span class="text-4xl mb-2">👕</span>
@@ -188,7 +165,6 @@
                         </div>
                     </div>
 
-                    <!-- Section 3: Aksesoris -->
                     <div class="bg-white p-6 rounded-3xl shadow-sm border border-orange-100">
                         <div class="flex justify-between items-center mb-4">
                             <h3 class="font-bold text-gray-800 flex items-center gap-2 text-lg">
@@ -197,11 +173,9 @@
                             <span class="text-xs text-gray-400 font-bold bg-gray-100 px-2 py-1 rounded-full" x-text="myAccessories.length + ' Item'"></span>
                         </div>
                         <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
-                             <!-- Lepas -->
                              <div @click="activeAccessory = 'none'" :class="activeAccessory === 'none' ? 'ring-2 ring-orange-500 bg-orange-50 shadow-md' : 'bg-gray-50 hover:bg-gray-100'" class="rounded-2xl p-4 cursor-pointer transition text-center flex flex-col items-center justify-center h-32 border border-transparent">
                                 <span class="text-2xl mb-2">❌</span><span class="text-xs font-bold text-gray-700">Lepas Acc</span>
                             </div>
-                            <!-- Items -->
                             <template x-for="acc in myAccessories" :key="acc.id">
                                 <div @click="activeAccessory = acc.type" :class="activeAccessory === acc.type ? 'ring-2 ring-orange-500 bg-orange-50 shadow-md transform scale-105' : 'bg-gray-50 hover:bg-gray-100'" class="rounded-2xl p-4 cursor-pointer transition text-center flex flex-col items-center justify-center h-32 border border-transparent">
                                     <span class="text-4xl mb-2">🎩</span>
@@ -216,7 +190,6 @@
         </div>
     </main>
 
-    <!-- 3. FOOTER (Sama dengan Homepage) -->
     <footer class="bg-gray-900 text-gray-400 py-8 border-t border-gray-800 mt-12">
         <div class="max-w-7xl mx-auto px-4 text-center">
             <span class="text-2xl block mb-2">🧸</span>
