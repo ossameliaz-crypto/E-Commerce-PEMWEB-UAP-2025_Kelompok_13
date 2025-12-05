@@ -3,74 +3,75 @@
 use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
 
+/*
+|--------------------------------------------------------------------------
+| Web Routes (MASTER - FINAL COMPLETE)
+|--------------------------------------------------------------------------
+|
+| Ini adalah file rute lengkap untuk seluruh aplikasi Build-A-Teddy.
+| Semua halaman didaftarkan di sini.
+|
+*/
+
 // ==========================================
-// 1. HALAMAN PUBLIK (Customer)
+// 1. CUSTOMER SIDE (HALAMAN PEMBELI)
 // ==========================================
 
-// Homepage (Beranda)
-Route::get('/', function () {
-    return view('welcome');
-})->name('home');
+// Homepage
+Route::get('/', function () { return view('welcome'); })->name('home');
 
-// Workshop (Buat Boneka + Suara)
-Route::get('/workshop', function () {
-    return view('builder');
-})->name('workshop');
+// Workshop (Buat Boneka)
+Route::get('/workshop', function () { return view('builder'); })->name('workshop');
 
 // Lemari Saya (Inventory)
-Route::get('/wardrobe', function () {
-    return view('wardrobe');
-})->name('wardrobe');
+Route::get('/wardrobe', function () { return view('wardrobe'); })->name('wardrobe');
 
-// Halaman Pembayaran (Tantangan Ujian)
-Route::get('/payment', function () {
-    return view('payment');
-})->name('payment');
+// Pembayaran & Checkout
+Route::get('/payment', function () { return view('payment'); })->name('payment');
+Route::get('/checkout', function () { return view('checkout'); })->name('checkout');
 
-// Simulasi Masuk Keranjang (Redirect ke Payment)
-Route::post('/cart/add-custom', function () {
-    return redirect()->route('payment'); 
-})->name('cart.add-custom');
+// Riwayat Pesanan (Lacak Paket)
+Route::get('/history', function () { return view('history'); })->name('history');
+
+// Logic Cart (Dummy Redirect)
+Route::post('/cart/add-custom', function () { return redirect()->route('payment'); })->name('cart.add-custom');
 
 
 // ==========================================
-// 2. HALAMAN SELLER 
+// 2. SELLER SIDE (HALAMAN PENJUAL)
 // ==========================================
 
-// Form Daftar Toko
-Route::get('/store/register', function () {
-    return view('seller.register');
-})->name('store.register');
+// Pendaftaran Toko
+Route::get('/store/register', function () { return view('seller.register'); })->name('store.register');
+Route::post('/store/create', function () { return redirect()->route('seller.dashboard'); })->name('store.create');
 
-// Proses Simpan Toko (Dummy Redirect)
-Route::post('/store/create', function () {
-    return redirect()->route('seller.dashboard'); 
-})->name('store.create');
+// Dashboard Utama Seller
+Route::get('/seller/dashboard', function () { return view('seller.dashboard'); })->name('seller.dashboard');
 
-// Dashboard Penjual
-Route::get('/seller/dashboard', function () {
-    return view('seller.dashboard');
-})->name('seller.dashboard');
+// Manajemen Produk (Upload)
+Route::get('/seller/products/create', function () { return view('seller.products.create'); })->name('seller.products.create');
+
+// Pesanan Masuk
+Route::get('/seller/orders', function () { return view('seller.orders'); })->name('seller.orders');
+
+// [BARU] Dompet & Penarikan Saldo
+Route::get('/seller/withdrawals', function () { return view('seller.withdrawls'); })->name('seller.withdrawals');
 
 
 // ==========================================
-// 3. HALAMAN ADMIN 
+// 3. ADMIN SIDE (HALAMAN ADMIN)
 // ==========================================
 
 // Dashboard Admin
-Route::get('/admin/dashboard', function () {
-    return view('admin.dashboard');
-})->name('admin.dashboard');
+Route::get('/admin/dashboard', function () { return view('admin.dashboard'); })->name('admin.dashboard');
 
 
 // ==========================================
-// 4. HALAMAN AUTH & USER 
+// 4. AUTHENTICATION & USER PROFILE (DEFAULT LARAVEL)
 // ==========================================
 
 // Dashboard User Biasa (Setelah Login)
-Route::get('/dashboard', function () {
-    return view('dashboard');
-})->middleware(['auth', 'verified'])->name('dashboard');
+Route::get('/dashboard', function () { return view('dashboard'); })->middleware(['auth', 'verified'])->name('dashboard');
 
 // Profil User
 Route::middleware('auth')->group(function () {
@@ -79,55 +80,5 @@ Route::middleware('auth')->group(function () {
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
 
-Route::middleware(['auth', 'role:member'])->group(function () {
-    Route::get('/store/register', function () {
-        return view('seller.register');
-    })->name('store.register');
-
-    Route::post('/store/create', function () {
-        return redirect()->route('seller.dashboard'); 
-    })->name('store.create');
-
-    Route::get('/seller/dashboard', function () {
-        return view('seller.dashboard');
-    })->name('seller.dashboard');
-});
-
-// ==========================================
-// 3. HALAMAN ADMIN 
-// ==========================================
-Route::middleware(['auth', 'role:admin'])->group(function () {
-    Route::get('/admin/dashboard', function () {
-        return view('admin.dashboard');
-    })->name('admin.dashboard');
-});
-
-// 1. Checkout (Customer)
-
-Route::get('/checkout', function () {
-
-    return view('checkout');
-
-})->name('checkout');
-
-
-
-// 2. History (Customer)
-
-Route::get('/history', function () {
-
-    return view('history');
-
-})->name('history');
-
-
-
-// 3. Orders (Seller)
-
-Route::get('/seller/orders', function () {
-
-    return view('seller.orders');
-
-})->name('seller.orders');
-
+// Load file auth bawaan (Login/Register logic)
 require __DIR__.'/auth.php';

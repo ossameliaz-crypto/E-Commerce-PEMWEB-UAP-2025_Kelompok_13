@@ -7,91 +7,133 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
-    <style>
-        body { font-family: 'Nunito', sans-serif; }
-        [x-cloak] { display: none !important; }
-        .loader {
-            border: 4px solid #f3f3f3;
-            border-top: 4px solid #f97316;
-            border-radius: 50%;
-            width: 30px;
-            height: 30px;
-            animation: spin 1s linear infinite;
-        }
-        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-    </style>
+    <style>body { font-family: 'Nunito', sans-serif; } [x-cloak] { display: none; }</style>
 </head>
-<body class="bg-orange-50/50 min-h-screen flex flex-col">
+<body class="bg-gray-100 min-h-screen">
 
-    <nav class="bg-white/90 backdrop-blur-md border-b border-orange-100 sticky top-0 z-50 shadow-sm">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex justify-between h-20 items-center">
-                <a href="{{ url('/') }}" class="flex items-center gap-2">
-                    <span class="text-4xl">🧸</span>
-                    <h1 class="text-2xl font-extrabold text-orange-600 tracking-wide">Build-A-Teddy</h1>
-                </a>
-            </div>
+    <nav class="bg-white border-b border-gray-200 py-4 shadow-sm">
+        <div class="max-w-6xl mx-auto px-4 flex items-center gap-4">
+            <a href="{{ url('/') }}" class="text-3xl">🧸</a>
+            <div class="h-8 w-px bg-gray-300"></div>
+            <h1 class="text-xl font-bold text-gray-700">Pembayaran</h1>
         </div>
     </nav>
 
-    <!-- MAIN CONTENT -->
-    <div class="flex-grow flex items-center justify-center p-6"
+    <div class="max-w-6xl mx-auto p-6 md:p-10"
          x-data="{ 
-            step: 1, vaCode: '', amount: 0, isLoading: false,
-            checkBill() {
-                if(this.vaCode.length < 5) return alert('Kode VA minimal 5 digit!');
-                this.step = 2; this.isLoading = true;
-                setTimeout(() => { this.isLoading = false; this.step = 3; this.amount = 150000; }, 1500);
-            },
-            payBill() {
-                this.step = 2; setTimeout(() => { this.step = 4; }, 1500);
+            paymentMethod: 'va_bca', 
+            category: 'transfer', 
+            step: 1,
+            amount: 170000,
+            
+            pay() {
+                this.step = 2;
+                setTimeout(() => { this.step = 3; }, 2000);
             }
          }">
 
-        <div class="w-full max-w-lg bg-white rounded-[2.5rem] shadow-2xl overflow-hidden border border-orange-100 relative">
-            <div class="bg-gradient-to-r from-orange-500 to-red-500 p-8 text-center text-white relative overflow-hidden">
-                <div class="absolute top-0 right-0 w-32 h-32 bg-white opacity-10 rounded-full -mr-10 -mt-10"></div>
-                <h2 class="text-2xl font-bold tracking-wider">TeddyPay Gateway</h2>
-                <p class="text-orange-100 text-sm mt-1">Transaksi Aman & Terpercaya</p>
+        <!-- STEP 1: PILIH METODE -->
+        <div x-show="step === 1" class="flex flex-col md:flex-row gap-6">
+            
+            <!-- KIRI: KATEGORI PEMBAYARAN -->
+            <div class="w-full md:w-3/4 bg-white shadow-sm rounded-lg overflow-hidden flex flex-col md:flex-row min-h-[500px]">
+                
+                <!-- Sidebar -->
+                <div class="w-full md:w-1/4 bg-gray-50 border-r border-gray-200">
+                    <button @click="category = 'ewallet'" :class="category === 'ewallet' ? 'bg-white text-orange-600 border-l-4 border-orange-500' : 'text-gray-600 hover:bg-gray-100'" class="w-full text-left px-6 py-4 font-bold text-sm transition">ShopeePay / E-Wallet</button>
+                    <button @click="category = 'transfer'" :class="category === 'transfer' ? 'bg-white text-orange-600 border-l-4 border-orange-500' : 'text-gray-600 hover:bg-gray-100'" class="w-full text-left px-6 py-4 font-bold text-sm transition">Transfer Bank (VA)</button>
+                    <button @click="category = 'offline'" :class="category === 'offline' ? 'bg-white text-orange-600 border-l-4 border-orange-500' : 'text-gray-600 hover:bg-gray-100'" class="w-full text-left px-6 py-4 font-bold text-sm transition">COD / Alfamart</button>
+                </div>
+
+                <!-- Konten Pilihan -->
+                <div class="w-full md:w-3/4 p-8">
+                    <h3 class="text-lg font-bold text-gray-800 mb-6">Pilih Metode Pembayaran</h3>
+
+                    <!-- E-Wallet -->
+                    <div x-show="category === 'ewallet'" class="space-y-4" x-transition>
+                        <label class="flex items-center gap-4 p-4 border rounded-lg cursor-pointer hover:border-orange-500 transition" :class="paymentMethod === 'shopeepay' ? 'border-orange-500 bg-orange-50' : 'border-gray-200'">
+                            <input type="radio" name="pay" value="shopeepay" x-model="paymentMethod" class="text-orange-600 focus:ring-orange-500">
+                            <div class="w-10 h-10 bg-orange-500 rounded flex items-center justify-center text-white font-bold text-xs">S-Pay</div>
+                            <span class="font-bold text-gray-700">ShopeePay</span>
+                        </label>
+                        <label class="flex items-center gap-4 p-4 border rounded-lg cursor-pointer hover:border-orange-500 transition" :class="paymentMethod === 'gopay' ? 'border-orange-500 bg-orange-50' : 'border-gray-200'">
+                            <input type="radio" name="pay" value="gopay" x-model="paymentMethod" class="text-orange-600 focus:ring-orange-500">
+                            <div class="w-10 h-10 bg-blue-500 rounded flex items-center justify-center text-white font-bold text-xs">Gopay</div>
+                            <span class="font-bold text-gray-700">GoPay</span>
+                        </label>
+                    </div>
+
+                    <!-- Transfer VA -->
+                    <div x-show="category === 'transfer'" class="space-y-4" x-transition>
+                        <label class="flex items-center gap-4 p-4 border rounded-lg cursor-pointer hover:border-orange-500 transition" :class="paymentMethod === 'va_bca' ? 'border-orange-500 bg-orange-50' : 'border-gray-200'">
+                            <input type="radio" name="pay" value="va_bca" x-model="paymentMethod" class="text-orange-600 focus:ring-orange-500">
+                            <div class="w-10 h-10 bg-blue-700 rounded flex items-center justify-center text-white font-bold text-xs">BCA</div>
+                            <div><span class="font-bold text-gray-700 block">Bank BCA</span><span class="text-xs text-gray-500">Dicek Otomatis</span></div>
+                        </label>
+                        <label class="flex items-center gap-4 p-4 border rounded-lg cursor-pointer hover:border-orange-500 transition" :class="paymentMethod === 'va_bri' ? 'border-orange-500 bg-orange-50' : 'border-gray-200'">
+                            <input type="radio" name="pay" value="va_bri" x-model="paymentMethod" class="text-orange-600 focus:ring-orange-500">
+                            <div class="w-10 h-10 bg-blue-500 rounded flex items-center justify-center text-white font-bold text-xs">BRI</div>
+                            <div><span class="font-bold text-gray-700 block">Bank BRI</span><span class="text-xs text-gray-500">Dicek Otomatis</span></div>
+                        </label>
+                    </div>
+
+                    <!-- Offline -->
+                    <div x-show="category === 'offline'" class="space-y-4" x-transition>
+                        <label class="flex items-center gap-4 p-4 border rounded-lg cursor-pointer hover:border-orange-500 transition" :class="paymentMethod === 'cod' ? 'border-orange-500 bg-orange-50' : 'border-gray-200'">
+                            <input type="radio" name="pay" value="cod" x-model="paymentMethod" class="text-orange-600 focus:ring-orange-500">
+                            <span class="text-2xl">📦</span>
+                            <span class="font-bold text-gray-700">COD (Bayar di Tempat)</span>
+                        </label>
+                        <label class="flex items-center gap-4 p-4 border rounded-lg cursor-pointer hover:border-orange-500 transition" :class="paymentMethod === 'alfa' ? 'border-orange-500 bg-orange-50' : 'border-gray-200'">
+                            <input type="radio" name="pay" value="alfa" x-model="paymentMethod" class="text-orange-600 focus:ring-orange-500">
+                            <div class="w-10 h-10 bg-red-600 rounded flex items-center justify-center text-white font-bold text-xs">Alfa</div>
+                            <span class="font-bold text-gray-700">Alfamart / Indomaret</span>
+                        </label>
+                    </div>
+                </div>
             </div>
 
-            <div class="p-8">
-                <div x-show="step === 1" x-transition>
-                    <label class="block text-gray-700 font-bold mb-3">Masukkan Kode Virtual Account</label>
-                    <input type="text" x-model="vaCode" placeholder="8800xxxxxxx" 
-                           class="w-full px-6 py-4 rounded-2xl bg-gray-50 border border-gray-200 focus:border-orange-500 focus:ring-4 focus:ring-orange-100 outline-none transition text-2xl font-mono text-center tracking-widest text-gray-800 mb-6 placeholder-gray-300">
-                    <button @click="checkBill()" class="w-full bg-orange-600 hover:bg-orange-700 text-white font-bold py-4 rounded-2xl shadow-lg hover:shadow-orange-500/30 transition transform hover:-translate-y-1">
-                        Lanjut Pembayaran
+            <!-- KANAN: RINGKASAN -->
+            <div class="w-full md:w-1/4">
+                <div class="bg-white shadow-sm rounded-lg p-6 sticky top-6">
+                    <h3 class="font-bold text-gray-700 mb-4">Ringkasan Pesanan</h3>
+                    <div class="flex justify-between mb-2 text-sm text-gray-600"><span>Total Belanja</span><span>Rp 150.000</span></div>
+                    <div class="flex justify-between mb-2 text-sm text-gray-600"><span>Ongkos Kirim</span><span>Rp 20.000</span></div>
+                    <hr class="my-4 border-dashed">
+                    <div class="flex justify-between mb-6">
+                        <span class="font-bold text-gray-800">Total Tagihan</span>
+                        <span class="font-extrabold text-orange-600 text-xl" x-text="'Rp ' + amount.toLocaleString('id-ID')"></span>
+                    </div>
+                    <button @click="pay()" class="w-full bg-orange-600 hover:bg-orange-700 text-white font-bold py-3 rounded-lg shadow-lg transform active:scale-95 transition">
+                        Buat Pesanan
                     </button>
-                    <a href="{{ url('/') }}" class="block text-center mt-6 text-gray-400 text-sm hover:text-orange-500">Batal Transaksi</a>
-                </div>
-
-                <div x-show="step === 2" class="flex flex-col items-center justify-center py-12" x-cloak>
-                    <div class="loader mb-4"></div>
-                    <p class="text-gray-500 font-bold animate-pulse">Memproses...</p>
-                </div>
-
-                <div x-show="step === 3" x-cloak>
-                    <div class="text-center mb-8">
-                        <span class="text-gray-400 text-xs font-bold uppercase tracking-widest">Total Tagihan</span>
-                        <h1 class="text-4xl font-extrabold text-gray-800 mt-2">Rp <span x-text="amount.toLocaleString('id-ID')"></span></h1>
-                    </div>
-                    <div class="bg-orange-50 p-6 rounded-2xl mb-6 space-y-3 border border-orange-100">
-                        <div class="flex justify-between text-sm"><span class="text-gray-500">Merchant</span><span class="font-bold">Build-A-Teddy</span></div>
-                        <div class="flex justify-between text-sm"><span class="text-gray-500">Kode VA</span><span class="font-mono font-bold" x-text="vaCode"></span></div>
-                    </div>
-                    <button @click="payBill()" class="w-full bg-green-500 hover:bg-green-600 text-white font-bold py-4 rounded-2xl shadow-lg transition">Konfirmasi Bayar</button>
-                </div>
-
-                <div x-show="step === 4" class="text-center py-8" x-cloak>
-                    <div class="w-24 h-24 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6 text-5xl">✅</div>
-                    <h2 class="text-2xl font-bold text-gray-800 mb-2">Pembayaran Sukses!</h2>
-                    <p class="text-gray-500 mb-8">Barangmu sedang diproses.</p>
-                    <a href="{{ url('/') }}" class="block w-full bg-gray-900 text-white font-bold py-4 rounded-2xl hover:bg-gray-800 transition">Kembali ke Toko</a>
                 </div>
             </div>
         </div>
-    </div>
 
+        <!-- LOADING & SUKSES -->
+        <div x-show="step === 2" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50" x-cloak>
+            <div class="bg-white p-8 rounded-2xl flex flex-col items-center">
+                <div class="w-12 h-12 border-4 border-orange-200 border-t-orange-600 rounded-full animate-spin mb-4"></div>
+                <p class="font-bold text-gray-700">Memproses Pembayaran...</p>
+            </div>
+        </div>
+
+        <div x-show="step === 3" class="max-w-xl mx-auto bg-white rounded-xl shadow-lg overflow-hidden mt-10" x-cloak>
+            <div class="bg-green-500 p-6 text-center">
+                <div class="w-20 h-20 bg-white rounded-full flex items-center justify-center mx-auto mb-4 text-4xl shadow-md">✅</div>
+                <h2 class="text-white font-bold text-2xl">Pesanan Dibuat!</h2>
+                <p class="text-green-100">Silakan lakukan pembayaran.</p>
+            </div>
+            <div class="p-8 text-center">
+                <p class="text-gray-500 text-sm font-bold uppercase mb-2">Kode Pembayaran</p>
+                <div class="bg-gray-100 px-6 py-4 rounded-xl text-3xl font-mono font-bold text-gray-800 tracking-widest mb-6 border border-gray-300">
+                    8800 1234 5678
+                </div>
+                <a href="{{ url('/') }}" class="block w-full bg-gray-900 text-white font-bold py-3 rounded-xl hover:bg-gray-800 transition">Kembali ke Toko</a>
+            </div>
+        </div>
+
+    </div>
 </body>
 </html>
