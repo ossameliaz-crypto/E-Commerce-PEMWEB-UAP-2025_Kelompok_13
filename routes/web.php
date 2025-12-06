@@ -5,11 +5,11 @@ use Illuminate\Support\Facades\Route;
 
 /*
 |--------------------------------------------------------------------------
-| Web Routes (MASTER - FINAL COMPLETE)
+| Web Routes (MASTER - FINAL FIXED FLOW)
 |--------------------------------------------------------------------------
 |
 | Ini adalah file rute lengkap untuk seluruh aplikasi Build-A-Teddy.
-| Semua halaman didaftarkan di sini.
+| Alur: Workshop -> Checkout -> Payment -> History
 |
 */
 
@@ -33,8 +33,10 @@ Route::get('/checkout', function () { return view('checkout'); })->name('checkou
 // Riwayat Pesanan (Lacak Paket)
 Route::get('/history', function () { return view('history'); })->name('history');
 
-// Logic Cart (Dummy Redirect)
-Route::post('/cart/add-custom', function () { return redirect()->route('payment'); })->name('cart.add-custom');
+// [FIX] Logic Cart: Redirect ke Checkout dulu (Bukan langsung Payment)
+Route::post('/cart/add-custom', function () { 
+    return redirect()->route('checkout'); 
+})->name('cart.add-custom');
 
 
 // ==========================================
@@ -54,7 +56,7 @@ Route::get('/seller/products/create', function () { return view('seller.products
 // Pesanan Masuk
 Route::get('/seller/orders', function () { return view('seller.orders'); })->name('seller.orders');
 
-// [BARU] Dompet & Penarikan Saldo
+// Dompet & Penarikan Saldo
 Route::get('/seller/withdrawals', function () { return view('seller.withdrawls'); })->name('seller.withdrawals');
 
 

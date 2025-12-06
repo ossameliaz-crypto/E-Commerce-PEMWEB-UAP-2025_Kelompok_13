@@ -12,6 +12,7 @@
 
     <div class="flex min-h-screen w-full">
         
+        <!-- BAGIAN KIRI: GAMBAR (Kiri di Register, Kanan di Login biar variasi) -->
         <div class="hidden md:block md:w-1/2 bg-orange-50 relative overflow-hidden">
             <div class="absolute inset-0 bg-gradient-to-bl from-orange-400 to-yellow-500 opacity-90"></div>
             <div class="absolute inset-0 flex items-center justify-center">
@@ -21,10 +22,12 @@
                     <p class="text-orange-100 text-xl max-w-md mx-auto leading-relaxed">Dapatkan akses ke ribuan aksesoris lucu dan mulai koleksi bonekamu hari ini.</p>
                 </div>
             </div>
+             <!-- Hiasan -->
              <div class="absolute top-0 left-0 -ml-20 -mt-20 w-96 h-96 rounded-full bg-white opacity-10 blur-3xl"></div>
              <div class="absolute bottom-0 right-0 -mr-20 -mb-20 w-80 h-80 rounded-full bg-white opacity-10 blur-2xl"></div>
         </div>
 
+        <!-- BAGIAN KANAN: FORM REGISTER -->
         <div class="w-full md:w-1/2 flex items-center justify-center p-8 md:p-12 bg-white">
             <div class="w-full max-w-md space-y-6">
                 
@@ -36,6 +39,7 @@
                 <form method="POST" action="{{ route('register') }}" class="space-y-5">
                     @csrf
 
+                    <!-- Name -->
                     <div>
                         <label for="name" class="block text-sm font-bold text-gray-700 ml-1 mb-2">Nama Lengkap</label>
                         <input id="name" type="text" name="name" :value="old('name')" required autofocus 
@@ -44,6 +48,7 @@
                         @error('name') <p class="mt-2 text-sm text-red-600 font-bold">{{ $message }}</p> @enderror
                     </div>
 
+                    <!-- Email Address -->
                     <div>
                         <label for="email" class="block text-sm font-bold text-gray-700 ml-1 mb-2">Alamat Email</label>
                         <input id="email" type="email" name="email" :value="old('email')" required 
@@ -52,6 +57,7 @@
                         @error('email') <p class="mt-2 text-sm text-red-600 font-bold">{{ $message }}</p> @enderror
                     </div>
 
+                    <!-- Password -->
                     <div>
                         <label for="password" class="block text-sm font-bold text-gray-700 ml-1 mb-2">Password</label>
                         <input id="password" type="password" name="password" required autocomplete="new-password"
@@ -60,6 +66,7 @@
                         @error('password') <p class="mt-2 text-sm text-red-600 font-bold">{{ $message }}</p> @enderror
                     </div>
 
+                    <!-- Confirm Password -->
                     <div>
                         <label for="password_confirmation" class="block text-sm font-bold text-gray-700 ml-1 mb-2">Konfirmasi Password</label>
                         <input id="password_confirmation" type="password" name="password_confirmation" required 
@@ -67,6 +74,7 @@
                             placeholder="Ulangi password">
                     </div>
 
+                    <!-- Tombol Daftar -->
                     <div class="pt-2">
                         <button type="submit" class="w-full flex justify-center py-4 px-4 border border-transparent rounded-2xl shadow-lg shadow-orange-500/30 text-base font-bold text-white bg-orange-600 hover:bg-orange-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500 transform hover:-translate-y-1 transition duration-200">
                             ✨ Daftar Sekarang
