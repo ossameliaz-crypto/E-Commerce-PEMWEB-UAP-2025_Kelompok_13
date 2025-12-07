@@ -5,55 +5,83 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Store; 
 use Illuminate\Support\Facades\Auth; 
+use Illuminate\Support\Facades\DB; 
+use Illuminate\Support\Facades\Storage; 
+use Illuminate\Validation\ValidationException; 
 
 class StoreController extends Controller
 {
-    /**
-     * Menampilkan formulir pendaftaran toko (Form Buka Toko).
-     */
     public function create()
     {
         if (Auth::user()->role === 'seller' || Store::where('user_id', Auth::id())->exists()) {
-            return redirect('/dashboard-seller')->with('error', 'Anda sudah memiliki toko.');
+            return redirect()->route('seller.dashboard')->with('error', 'Anda sudah memiliki toko.'); 
         }
         
-        return view('stores.create'); // Misal view ini bernama create.blade.php
+        return view('seller.register'); 
     }
 
-    /**
-     * Memproses data dari Form Buka Toko dan menyimpannya ke database.
-     */
     public function store(Request $request)
     {
         // 1. Validasi Data
-        $request->validate([
-            'name' => 'required|string|max:255|unique:stores,name', // Nama toko harus unik
-            'about' => 'nullable|string',
-            // Tambahkan validasi untuk logo, phone, city, address, postal_code
-        ]);
-
-        // 2. Cek Duplikasi (Meski sudah ada 'unique()' di migrasi, ini penting di level aplikasi)
-        if (Store::where('user_id', Auth::id())->exists()) {
-            return redirect()->back()->with('error', 'Anda hanya diizinkan memiliki satu toko.');
+        try {
+            $request->validate([
+                'name' => 'required|string|max:255|unique:stores,name', 
+                'about' => 'nullable|string',
+                'phone' => 'nullable|string',
+                'city' => 'nullable|string',
+                'address' => 'nullable|string',
+                'postal_code' => 'nullable|string',
+                'logo' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048', 
+            ]);
+        } catch (ValidationException $e) {
+            return redirect()->back()->withErrors($e->errors())->withInput();
         }
 
-        // 3. Insert Data ke Tabel 'stores'
-        $store = Store::create([
-            'user_id' => Auth::id(), // ID pengguna yang sedang login
-            'name' => $request->name,
-            'about' => $request->about,
-            // Jika ada upload logo
-            'logo' => $this->handleLogoUpload($request), 
-            'phone' => $request->phone,
-            'city' => $request->city,
-            'address' => $request->address,
-            'postal_code' => $request->postal_code,
-            'is_verified' => false, // Default false sesuai migrasi
-        ]);
+        DB::beginTransaction(); 
+        $logoPath = null; 
 
-        // 4. Update Role User menjadi 'seller'
-        Auth::user()->update(['role' => 'seller']); 
+        try {
+            $user = Auth::user();
+            
+            if ($request->hasFile('logo')) { 
+                $logoPath = $request->file('logo')->store('stores/logos', 'public');
+            }
 
-        return redirect('/dashboard-seller')->with('success', 'Toko berhasil didaftarkan! Selamat berjualan.');
+            if (Store::where('user_id', $user->id)->exists()) {
+                DB::rollBack();
+                if ($logoPath) { Storage::disk('public')->delete($logoPath); }
+                return redirect()->back()->with('error', 'Anda hanya diizinkan memiliki satu toko.');
+            }
+
+            // 3. Insert Data ke Tabel 'stores'
+            Store::create([
+                'user_id' => $user->id,
+                'name' => $request->name,
+                'about' => $request->about,
+                'logo' => $logoPath, // Akan terisi path atau NULL (jika tidak ada file)
+                'phone' => $request->phone,
+                'address_id' => null,
+                'city' => $request->city,
+                'address' => $request->address,
+                'postal_code' => $request->postal_code,
+                'is_verified' => false,
+            ]);
+
+            // 4. Update Role User
+            $user->update(['role' => 'seller']); 
+            
+            DB::commit(); 
+
+            return redirect()->route('seller.dashboard')->with('success', 'Toko berhasil didaftarkan! Role Anda kini adalah Seller.');
+
+        } catch (\Exception $e) {
+            DB::rollBack(); 
+            
+            // Hapus file yang sudah terlanjur ter-upload jika terjadi kegagalan DB
+            if ($logoPath) { Storage::disk('public')->delete($logoPath); }
+            
+            // Tampilkan error DB spesifik
+            return redirect()->back()->with('error', 'Gagal memproses pendaftaran toko. Silakan coba lagi. Error DB: ' . $e->getMessage()); 
+        }
     }
 }

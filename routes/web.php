@@ -6,7 +6,7 @@ use Illuminate\Support\Facades\Route;
 
 /*
 |--------------------------------------------------------------------------
-| Web Routes (FINAL FIXED FLOW)
+| Web Routes (MASTER - FINAL FIXED FLOW)
 |--------------------------------------------------------------------------
 */
 
@@ -21,15 +21,14 @@ Route::get('/', function () { return view('welcome'); })->name('home');
 Route::get('/workshop', function () { return view('builder'); })->name('workshop');
 Route::get('/wardrobe', function () { return view('wardrobe'); })->name('wardrobe');
 
-// Checkout, Payment, History 
+// Checkout, Payment, History (Membutuhkan autentikasi)
 Route::middleware(['auth'])->group(function () {
-    Route::get('/checkout', function () { return view('checkout'); })->name('checkout');
     Route::get('/payment', function () { return view('payment'); })->name('payment');
+    Route::get('/checkout', function () { return view('checkout'); })->name('checkout');
     Route::get('/history', function () { return view('history'); })->name('history');
-    
-    // Logic Cart: Redirect ke Checkout dulu
+
+    // Logic Cart
     Route::post('/cart/add-custom', function () { 
-        // Idealnya: [CartController::class, 'add']
         return redirect()->route('checkout'); 
     })->name('cart.add-custom');
 });
@@ -40,22 +39,30 @@ Route::middleware(['auth'])->group(function () {
 // ==========================================
 
 Route::middleware(['auth'])->group(function () {
-    // PENDAFTARAN TOKO (Form Buka Toko)
+    
+    // ⭐ Pendaftaran Toko (Integrasi StoreController)
+    
+    // GET: Menampilkan formulir pendaftaran.
     Route::get('/store/register', [StoreController::class, 'create'])->name('store.register');
     
-    // POST: Memproses pendaftaran toko, MENGUBAH ROLE user menjadi 'seller', dan INSERT data ke tabel 'stores'.
-    Route::post('/store/create', [StoreController::class, 'store'])->name('store.create');
+    // POST: Memproses pendaftaran, INSERT data, dan MENGUBAH ROLE user menjadi 'seller'.
+    Route::post('/store/create', [StoreController::class, 'store'])->name('store.create'); 
 
+    // Area Seller: Asumsi kamu akan menggunakan Middleware 'role:seller' (atau sejenisnya)
+    Route::prefix('seller')->name('seller.')->group(function () {
 
-    // SELLER AREA (Hanya bisa diakses oleh user dengan role 'seller')
-    Route::middleware(['role:seller'])->prefix('seller')->name('seller.')->group(function () {
-
+        // Dashboard Utama Seller (GET)
         Route::get('/dashboard', function () { return view('seller.dashboard'); })->name('dashboard');
+
+        // Manajemen Produk (Upload)
         Route::get('/products/create', function () { return view('seller.products.create'); })->name('products.create');
+
+        // Pesanan Masuk
         Route::get('/orders', function () { return view('seller.orders'); })->name('orders');
+
+        // Dompet & Penarikan Saldo
         Route::get('/withdrawals', function () { return view('seller.withdrawls'); })->name('withdrawals');
     });
-
 });
 
 
@@ -63,21 +70,18 @@ Route::middleware(['auth'])->group(function () {
 // 3. ADMIN SIDE (HALAMAN ADMIN)
 // ==========================================
 
-// Hanya bisa diakses oleh user dengan role 'admin'
-Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->group(function () {
+// Asumsi: Harus dilindungi oleh middleware role 'admin'
+Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () {
     Route::get('/dashboard', function () { return view('admin.dashboard'); })->name('dashboard');
 });
 
 
 // ==========================================
-// 4. AUTHENTICATION & USER PROFILE
+// 4. AUTHENTICATION & USER PROFILE (DEFAULT LARAVEL)
 // ==========================================
 
 // Dashboard User Biasa (Setelah Login)
-Route::get('/dashboard', function () { 
-    // Jika role sudah seller/admin, akan di-redirect oleh middleware ke dashboard mereka.
-    return view('dashboard'); 
-})->middleware(['auth', 'verified'])->name('dashboard');
+Route::get('/dashboard', function () { return view('dashboard'); })->middleware(['auth', 'verified'])->name('dashboard');
 
 // Profil User
 Route::middleware('auth')->group(function () {
