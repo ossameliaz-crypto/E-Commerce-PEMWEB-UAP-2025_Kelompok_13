@@ -2,10 +2,17 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory; 
 use Illuminate\Database\Eloquent\Model;
+
+use App\Models\User; 
+use App\Models\StoreBalance; 
+use App\Models\Product; 
+use App\Models\Transaction; 
 
 class Store extends Model
 {
+    use HasFactory; 
 
     protected $fillable = [
         'user_id',
@@ -20,22 +27,25 @@ class Store extends Model
         'is_verified',
     ];
 
-    // relationships one store has one owner (user)
+    // Relasi 1:1 ke User (Pemilik Toko)
     public function user()
     {
         return $this->belongsTo(User::class);
     }
 
-    public function storeBallance()
+    // Relasi 1:1 ke Saldo Toko
+    public function storeBalance() 
     {
         return $this->hasOne(StoreBalance::class);
     }
 
+    // Relasi 1:M ke Produk
     public function products()
     {
         return $this->hasMany(Product::class);
     }
 
+    // Relasi 1:M ke Transaksi
     public function transactions()
     {
         return $this->hasMany(Transaction::class);

@@ -1,16 +1,13 @@
 <?php
 
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\StoreController; // WAJIB: Import StoreController
 use Illuminate\Support\Facades\Route;
 
 /*
 |--------------------------------------------------------------------------
-| Web Routes (MASTER - FINAL FIXED FLOW)
+| Web Routes (FINAL FIXED FLOW)
 |--------------------------------------------------------------------------
-|
-| Ini adalah file rute lengkap untuk seluruh aplikasi Build-A-Teddy.
-| Alur: Workshop -> Checkout -> Payment -> History
-|
 */
 
 // ==========================================
@@ -20,60 +17,67 @@ use Illuminate\Support\Facades\Route;
 // Homepage
 Route::get('/', function () { return view('welcome'); })->name('home');
 
-// Workshop (Buat Boneka)
+// Workshop & Inventory (Diasumsikan hanya menampilkan view)
 Route::get('/workshop', function () { return view('builder'); })->name('workshop');
-
-// Lemari Saya (Inventory)
 Route::get('/wardrobe', function () { return view('wardrobe'); })->name('wardrobe');
 
-// Pembayaran & Checkout
-Route::get('/payment', function () { return view('payment'); })->name('payment');
-Route::get('/checkout', function () { return view('checkout'); })->name('checkout');
-
-// Riwayat Pesanan (Lacak Paket)
-Route::get('/history', function () { return view('history'); })->name('history');
-
-// [FIX] Logic Cart: Redirect ke Checkout dulu (Bukan langsung Payment)
-Route::post('/cart/add-custom', function () { 
-    return redirect()->route('checkout'); 
-})->name('cart.add-custom');
+// Checkout, Payment, History 
+Route::middleware(['auth'])->group(function () {
+    Route::get('/checkout', function () { return view('checkout'); })->name('checkout');
+    Route::get('/payment', function () { return view('payment'); })->name('payment');
+    Route::get('/history', function () { return view('history'); })->name('history');
+    
+    // Logic Cart: Redirect ke Checkout dulu
+    Route::post('/cart/add-custom', function () { 
+        // Idealnya: [CartController::class, 'add']
+        return redirect()->route('checkout'); 
+    })->name('cart.add-custom');
+});
 
 
 // ==========================================
 // 2. SELLER SIDE (HALAMAN PENJUAL)
 // ==========================================
 
-// Pendaftaran Toko
-Route::get('/store/register', function () { return view('seller.register'); })->name('store.register');
-Route::post('/store/create', function () { return redirect()->route('seller.dashboard'); })->name('store.create');
+Route::middleware(['auth'])->group(function () {
+    // PENDAFTARAN TOKO (Form Buka Toko)
+    Route::get('/store/register', [StoreController::class, 'create'])->name('store.register');
+    
+    // POST: Memproses pendaftaran toko, MENGUBAH ROLE user menjadi 'seller', dan INSERT data ke tabel 'stores'.
+    Route::post('/store/create', [StoreController::class, 'store'])->name('store.create');
 
-// Dashboard Utama Seller
-Route::get('/seller/dashboard', function () { return view('seller.dashboard'); })->name('seller.dashboard');
 
-// Manajemen Produk (Upload)
-Route::get('/seller/products/create', function () { return view('seller.products.create'); })->name('seller.products.create');
+    // SELLER AREA (Hanya bisa diakses oleh user dengan role 'seller')
+    Route::middleware(['role:seller'])->prefix('seller')->name('seller.')->group(function () {
 
-// Pesanan Masuk
-Route::get('/seller/orders', function () { return view('seller.orders'); })->name('seller.orders');
+        Route::get('/dashboard', function () { return view('seller.dashboard'); })->name('dashboard');
+        Route::get('/products/create', function () { return view('seller.products.create'); })->name('products.create');
+        Route::get('/orders', function () { return view('seller.orders'); })->name('orders');
+        Route::get('/withdrawals', function () { return view('seller.withdrawls'); })->name('withdrawals');
+    });
 
-// Dompet & Penarikan Saldo
-Route::get('/seller/withdrawals', function () { return view('seller.withdrawls'); })->name('seller.withdrawals');
+});
 
 
 // ==========================================
 // 3. ADMIN SIDE (HALAMAN ADMIN)
 // ==========================================
 
-// Dashboard Admin
-Route::get('/admin/dashboard', function () { return view('admin.dashboard'); })->name('admin.dashboard');
+// Hanya bisa diakses oleh user dengan role 'admin'
+Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->group(function () {
+    Route::get('/dashboard', function () { return view('admin.dashboard'); })->name('dashboard');
+});
 
 
 // ==========================================
-// 4. AUTHENTICATION & USER PROFILE (DEFAULT LARAVEL)
+// 4. AUTHENTICATION & USER PROFILE
 // ==========================================
 
 // Dashboard User Biasa (Setelah Login)
-Route::get('/dashboard', function () { return view('dashboard'); })->middleware(['auth', 'verified'])->name('dashboard');
+Route::get('/dashboard', function () { 
+    // Jika role sudah seller/admin, akan di-redirect oleh middleware ke dashboard mereka.
+    return view('dashboard'); 
+})->middleware(['auth', 'verified'])->name('dashboard');
 
 // Profil User
 Route::middleware('auth')->group(function () {
