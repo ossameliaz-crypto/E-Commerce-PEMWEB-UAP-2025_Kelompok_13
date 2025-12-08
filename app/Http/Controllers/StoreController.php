@@ -43,22 +43,30 @@ class StoreController extends Controller
         try {
             $user = Auth::user();
             
-            if ($request->hasFile('logo')) { 
-                $logoPath = $request->file('logo')->store('stores/logos', 'public');
-            }
-
             if (Store::where('user_id', $user->id)->exists()) {
                 DB::rollBack();
-                if ($logoPath) { Storage::disk('public')->delete($logoPath); }
                 return redirect()->back()->with('error', 'Anda hanya diizinkan memiliki satu toko.');
             }
 
+            // 2. Upload File & Update Profile Picture (DUAL UPDATE)
+            if ($request->hasFile('logo')) { 
+                // Simpan file ke storage
+                $logoPath = $request->file('logo')->store('stores/logos', 'public');
+
+                // Opsional: Hapus foto profil lama
+                if ($user->profile_picture) {
+                    Storage::disk('public')->delete($user->profile_picture);
+                }
+
+                $user->update(['profile_picture' => $logoPath]);
+            }
+            
             // 3. Insert Data ke Tabel 'stores'
             Store::create([
                 'user_id' => $user->id,
                 'name' => $request->name,
                 'about' => $request->about,
-                'logo' => $logoPath, // Akan terisi path atau NULL (jika tidak ada file)
+                'logo' => $logoPath, 
                 'phone' => $request->phone,
                 'address_id' => null,
                 'city' => $request->city,
@@ -72,15 +80,13 @@ class StoreController extends Controller
             
             DB::commit(); 
 
-            return redirect()->route('seller.dashboard')->with('success', 'Toko berhasil didaftarkan! Role Anda kini adalah Seller.');
+            return redirect()->route('seller.dashboard')->with('success', 'Toko berhasil didaftarkan! Logo toko telah disinkronkan ke foto profil.');
 
         } catch (\Exception $e) {
             DB::rollBack(); 
             
-            // Hapus file yang sudah terlanjur ter-upload jika terjadi kegagalan DB
             if ($logoPath) { Storage::disk('public')->delete($logoPath); }
             
-            // Tampilkan error DB spesifik
             return redirect()->back()->with('error', 'Gagal memproses pendaftaran toko. Silakan coba lagi. Error DB: ' . $e->getMessage()); 
         }
     }

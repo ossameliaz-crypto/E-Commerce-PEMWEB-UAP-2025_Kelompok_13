@@ -12,24 +12,21 @@
 
     <div class="flex min-h-screen w-full">
         
-        <!-- BAGIAN KIRI: GAMBAR (Kiri di Register, Kanan di Login biar variasi) -->
         <div class="hidden md:block md:w-1/2 bg-orange-50 relative overflow-hidden">
             <div class="absolute inset-0 bg-gradient-to-bl from-orange-400 to-yellow-500 opacity-90"></div>
             <div class="absolute inset-0 flex items-center justify-center">
                 <div class="text-center p-12 text-white relative z-10">
-                    <span class="text-9xl block mb-6 drop-shadow-xl">✨</span>
+                    <span class="text-9xl block mb-6 drop-shadow-xl">🧸</span>
                     <h2 class="text-5xl font-extrabold mb-6 tracking-tight">Gabung Sekarang</h2>
                     <p class="text-orange-100 text-xl max-w-md mx-auto leading-relaxed">Dapatkan akses ke ribuan aksesoris lucu dan mulai koleksi bonekamu hari ini.</p>
                 </div>
             </div>
-             <!-- Hiasan -->
              <div class="absolute top-0 left-0 -ml-20 -mt-20 w-96 h-96 rounded-full bg-white opacity-10 blur-3xl"></div>
              <div class="absolute bottom-0 right-0 -mr-20 -mb-20 w-80 h-80 rounded-full bg-white opacity-10 blur-2xl"></div>
         </div>
 
-        <!-- BAGIAN KANAN: FORM REGISTER -->
         <div class="w-full md:w-1/2 flex items-center justify-center p-8 md:p-12 bg-white">
-            <div class="w-full max-w-md space-y-6">
+            <div class="w-full max-w-md space-y-5">
                 
                 <div class="text-center md:text-left mb-8">
                     <h2 class="text-4xl font-extrabold text-gray-900 tracking-tight">Buat Akun Baru</h2>
@@ -39,25 +36,30 @@
                 <form method="POST" action="{{ route('register') }}" class="space-y-5">
                     @csrf
 
-                    <!-- Name -->
                     <div>
                         <label for="name" class="block text-sm font-bold text-gray-700 ml-1 mb-2">Nama Lengkap</label>
-                        <input id="name" type="text" name="name" :value="old('name')" required autofocus 
+                        <input id="name" type="text" name="name" value="{{ old('name') }}" required autofocus 
                             class="block w-full px-5 py-4 bg-gray-50 border border-gray-200 rounded-2xl text-gray-900 focus:ring-4 focus:ring-orange-100 focus:border-orange-500 transition font-semibold outline-none" 
-                            placeholder="Contoh: Ossa P.">
+                            placeholder="Contoh: Ossa P." autocomplete="name">
                         @error('name') <p class="mt-2 text-sm text-red-600 font-bold">{{ $message }}</p> @enderror
                     </div>
 
-                    <!-- Email Address -->
                     <div>
                         <label for="email" class="block text-sm font-bold text-gray-700 ml-1 mb-2">Alamat Email</label>
-                        <input id="email" type="email" name="email" :value="old('email')" required 
+                        <input id="email" type="email" name="email" value="{{ old('email') }}" required 
                             class="block w-full px-5 py-4 bg-gray-50 border border-gray-200 rounded-2xl text-gray-900 focus:ring-4 focus:ring-orange-100 focus:border-orange-500 transition font-semibold outline-none" 
-                            placeholder="nama@email.com">
+                            placeholder="nama@email.com" autocomplete="email">
                         @error('email') <p class="mt-2 text-sm text-red-600 font-bold">{{ $message }}</p> @enderror
                     </div>
+                    
+                    <div>
+                        <label for="phone_number" class="block text-sm font-bold text-gray-700 ml-1 mb-2">Nomor Telepon</label>
+                        <input id="phone_number" type="text" name="phone_number" value="{{ old('phone_number') }}" required 
+                            class="block w-full px-5 py-4 bg-gray-50 border border-gray-200 rounded-2xl text-gray-900 focus:ring-4 focus:ring-orange-100 focus:border-orange-500 transition font-semibold outline-none" 
+                            placeholder="Contoh: 08123456789" autocomplete="tel">
+                        @error('phone_number') <p class="mt-2 text-sm text-red-600 font-bold">{{ $message }}</p> @enderror
+                    </div>
 
-                    <!-- Password -->
                     <div>
                         <label for="password" class="block text-sm font-bold text-gray-700 ml-1 mb-2">Password</label>
                         <input id="password" type="password" name="password" required autocomplete="new-password"
@@ -66,15 +68,13 @@
                         @error('password') <p class="mt-2 text-sm text-red-600 font-bold">{{ $message }}</p> @enderror
                     </div>
 
-                    <!-- Confirm Password -->
                     <div>
                         <label for="password_confirmation" class="block text-sm font-bold text-gray-700 ml-1 mb-2">Konfirmasi Password</label>
-                        <input id="password_confirmation" type="password" name="password_confirmation" required 
+                        <input id="password_confirmation" type="password" name="password_confirmation" required autocomplete="new-password"
                             class="block w-full px-5 py-4 bg-gray-50 border border-gray-200 rounded-2xl text-gray-900 focus:ring-4 focus:ring-orange-100 focus:border-orange-500 transition font-semibold outline-none" 
                             placeholder="Ulangi password">
                     </div>
 
-                    <!-- Tombol Daftar -->
                     <div class="pt-2">
                         <button type="submit" class="w-full flex justify-center py-4 px-4 border border-transparent rounded-2xl shadow-lg shadow-orange-500/30 text-base font-bold text-white bg-orange-600 hover:bg-orange-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500 transform hover:-translate-y-1 transition duration-200">
                             ✨ Daftar Sekarang

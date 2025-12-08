@@ -1,7 +1,7 @@
 <?php
 
 use App\Http\Controllers\ProfileController;
-use App\Http\Controllers\StoreController; // WAJIB: Import StoreController
+use App\Http\Controllers\StoreController; 
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -39,17 +39,16 @@ Route::middleware(['auth'])->group(function () {
 // ==========================================
 
 Route::middleware(['auth'])->group(function () {
-    
-    // ⭐ Pendaftaran Toko (Integrasi StoreController)
-    
-    // GET: Menampilkan formulir pendaftaran.
+
+    // GET: Menampilkan formulir pendaftaran Toko.
     Route::get('/store/register', [StoreController::class, 'create'])->name('store.register');
-    
-    // POST: Memproses pendaftaran, INSERT data, dan MENGUBAH ROLE user menjadi 'seller'.
+
+    // POST: Memproses pendaftaran, INSERT data (termasuk sinkronisasi logo).
     Route::post('/store/create', [StoreController::class, 'store'])->name('store.create'); 
 
     // Area Seller: Asumsi kamu akan menggunakan Middleware 'role:seller' (atau sejenisnya)
     Route::prefix('seller')->name('seller.')->group(function () {
+        // Catatan: Jika Anda punya middleware 'role:seller', tambahkan di sini.
 
         // Dashboard Utama Seller (GET)
         Route::get('/dashboard', function () { return view('seller.dashboard'); })->name('dashboard');
@@ -61,7 +60,7 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/orders', function () { return view('seller.orders'); })->name('orders');
 
         // Dompet & Penarikan Saldo
-        Route::get('/withdrawals', function () { return view('seller.withdrawls'); })->name('withdrawals');
+        Route::get('/withdrawals', function () { return view('seller.withdrawals'); })->name('withdrawals');
     });
 });
 
@@ -70,8 +69,8 @@ Route::middleware(['auth'])->group(function () {
 // 3. ADMIN SIDE (HALAMAN ADMIN)
 // ==========================================
 
-// Asumsi: Harus dilindungi oleh middleware role 'admin'
-Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () {
+// Harus dilindungi oleh middleware role 'admin' 
+Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->group(function () {
     Route::get('/dashboard', function () { return view('admin.dashboard'); })->name('dashboard');
 });
 
@@ -88,7 +87,9 @@ Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+    Route::patch('/profile/update-image', [ProfileController::class, 'updateImage'])->name('profile.update-image'); 
 });
+
 
 // Load file auth bawaan (Login/Register logic)
 require __DIR__.'/auth.php';

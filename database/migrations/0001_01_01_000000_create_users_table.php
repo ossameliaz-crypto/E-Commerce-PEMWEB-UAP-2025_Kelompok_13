@@ -23,7 +23,7 @@ return new class extends Migration
             // KOLOM E-COMMERCE & MULTI-ROLE
             $table->enum('role', ['admin', 'member','seller'])->default('member')->comment('Role pengguna untuk akses halaman tertentu');
             $table->string('profile_picture')->nullable();
-            $table->string('phone_number')->nullable()->comment('Diisi saat user ingin checkout menggunakan E-Wallet');
+            $table->string('phone_number')->nullable();
             
             // VERIFIKASI & KEAMANAN
             $table->timestamp('email_verified_at')->nullable(); 
