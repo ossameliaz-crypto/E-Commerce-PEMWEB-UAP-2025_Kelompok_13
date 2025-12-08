@@ -46,10 +46,8 @@ Route::middleware(['auth'])->group(function () {
     // POST: Memproses pendaftaran, INSERT data (termasuk sinkronisasi logo).
     Route::post('/store/create', [StoreController::class, 'store'])->name('store.create'); 
 
-    // Area Seller: Asumsi kamu akan menggunakan Middleware 'role:seller' (atau sejenisnya)
+    // Area Seller: Harus memiliki role 'seller'
     Route::prefix('seller')->name('seller.')->group(function () {
-        // Catatan: Jika Anda punya middleware 'role:seller', tambahkan di sini.
-
         // Dashboard Utama Seller (GET)
         Route::get('/dashboard', function () { return view('seller.dashboard'); })->name('dashboard');
 
@@ -82,12 +80,18 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
 // Dashboard User Biasa (Setelah Login)
 Route::get('/dashboard', function () { return view('dashboard'); })->middleware(['auth', 'verified'])->name('dashboard');
 
-// Profil User
+// Profil User & Update
 Route::middleware('auth')->group(function () {
+    // Profil Info, Update, Delete
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+    
+    // Update Foto Profil/Logo Toko 
     Route::patch('/profile/update-image', [ProfileController::class, 'updateImage'])->name('profile.update-image'); 
+
+    // Route ini diperlukan untuk form Update Password di halaman profil
+    Route::put('/password', [ProfileController::class, 'updatePassword'])->name('password.update');
 });
 
 

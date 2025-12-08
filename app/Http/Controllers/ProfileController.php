@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\ProfileUpdateRequest;
+use App\Http\Requests\UpdatePasswordRequest; 
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -10,6 +11,7 @@ use Illuminate\Support\Facades\Redirect;
 use Illuminate\View\View;
 use Illuminate\Support\Facades\Storage; 
 use Illuminate\Support\Facades\DB; 
+use Illuminate\Support\Facades\Hash; 
 use App\Models\Store; 
 use App\Models\User; 
 
@@ -40,8 +42,36 @@ class ProfileController extends Controller
 
         $request->user()->save();
 
-        return Redirect::route('profile.edit')->with('status', 'profile-updated');
+        return Redirect::back()->with('status', 'profile-updated'); // Menggunakan Redirect::back()
     }
+
+    // ===============================================
+    // METODE KRITIS: UPDATE PASSWORD (Dengan Logout Paksa)
+    // ===============================================
+    /**
+     * Update the user's password.
+     */
+    public function updatePassword(UpdatePasswordRequest $request): RedirectResponse
+    {
+        $user = $request->user();
+        
+        // 1. Hash password baru
+        $hashedPassword = Hash::make($request->password);
+        
+        // 2. Simpan password baru secara paksa (mengatasi fillable issue)
+        $user->forceFill([
+            'password' => $hashedPassword, 
+        ])->save();
+
+        // 3. LOGOUT PAKSA DAN BERSIHKAN SESI
+        Auth::logout();
+        $request->session()->invalidate();
+        $request->session()->regenerateToken();
+
+        // Redirect ke halaman utama (login), bukan ke halaman profil.
+        return Redirect::to('/')->with('status', 'password-updated'); 
+    }
+    // ===============================================
 
     // ===============================================
     // METODE: UPDATE FOTO PROFIL (profile_picture & SINKRONISASI LOGO TOKO)
@@ -60,7 +90,7 @@ class ProfileController extends Controller
                 'image_file' => ['required', 'image', 'mimes:jpeg,png,jpg,gif,svg', 'max:2048'],
             ]);
         } catch (\Exception $e) {
-            return Redirect::route('profile.edit')->with('error', 'Gagal validasi gambar: ' . $e->getMessage());
+            return Redirect::back()->with('error', 'Gagal validasi gambar: ' . $e->getMessage()); // Menggunakan Redirect::back()
         }
 
         $column_name = 'profile_picture'; 
@@ -96,7 +126,7 @@ class ProfileController extends Controller
 
                 DB::commit(); 
 
-                return Redirect::route('profile.edit')->with('status', 'image-updated');
+                return Redirect::back()->with('status', 'image-updated'); // Menggunakan Redirect::back()
                 
             } catch (\Exception $e) {
                 DB::rollBack(); 
@@ -105,20 +135,17 @@ class ProfileController extends Controller
                 if (isset($path)) {
                     Storage::disk('public')->delete($path);
                 }
-                return Redirect::route('profile.edit')->with('error', 'Gagal memperbarui data: ' . $e->getMessage());
+                return Redirect::back()->with('error', 'Gagal memperbarui data: ' . $e->getMessage()); // Menggunakan Redirect::back()
             }
         }
 
-        return Redirect::route('profile.edit')->with('error', 'Tidak ada file gambar yang terdeteksi.');
+        return Redirect::back()->with('error', 'Tidak ada file gambar yang terdeteksi.'); // Menggunakan Redirect::back()
     }
     // ===============================================
     
     // ===============================================
     // METODE: DELETE AKUN
     // ===============================================
-    /**
-     * Delete the user's account.
-     */
     public function destroy(Request $request): RedirectResponse
     {
         $request->validateWithBag('userDeletion', [
@@ -138,7 +165,6 @@ class ProfileController extends Controller
             if ($user->store->logo && $user->store->logo !== $user->profile_picture) {
                 Storage::disk('public')->delete($user->store->logo);
             }
-            // Catatan: Jika logo toko sama dengan profile_picture, penghapusan sudah dilakukan di langkah 1.
         }
 
         // 3. Logout dan Hapus Akun
