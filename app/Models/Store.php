@@ -2,52 +2,54 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory; 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-use App\Models\User; 
-use App\Models\StoreBalance; 
-use App\Models\Product; 
-use App\Models\Transaction; 
+// Import Model lain untuk relasi
+use App\Models\User;
+use App\Models\Product;
+use App\Models\Transaction;
 
 class Store extends Model
 {
-    use HasFactory; 
+    use HasFactory;
 
+    /**
+     * Daftar kolom yang boleh diisi (Mass Assignable).
+     * Harus SAMA PERSIS dengan nama kolom di Database Migration.
+     */
     protected $fillable = [
         'user_id',
         'name',
+        'slug',         // Wajib ada buat URL cantik (toko-budi)
+        'description',  // Kita pakai 'description', bukan 'about'
         'logo',
-        'about',
         'phone',
-        'address_id',
+        'address',      // Langsung teks alamat, tidak pakai ID
         'city',
-        'address',
         'postal_code',
+        'balance',      // Saldo toko
         'is_verified',
     ];
 
-    // Relasi 1:1 ke User (Pemilik Toko)
+    // --- RELASI (RELATIONSHIPS) ---
+
+    // 1. Toko milik 1 User
     public function user()
     {
         return $this->belongsTo(User::class);
     }
 
-    // Relasi 1:1 ke Saldo Toko
-    public function storeBalance() 
-    {
-        return $this->hasOne(StoreBalance::class);
-    }
-
-    // Relasi 1:M ke Produk
+    // 2. Toko punya banyak Produk
     public function products()
     {
         return $this->hasMany(Product::class);
     }
 
-    // Relasi 1:M ke Transaksi
+    // 3. Toko punya banyak Transaksi (Pesanan Masuk)
+    // Relasi ini diambil lewat produk yang ada di detail transaksi
     public function transactions()
     {
-        return $this->hasMany(Transaction::class);
+        return $this->hasManyThrough(Transaction::class, Product::class);
     }
 }

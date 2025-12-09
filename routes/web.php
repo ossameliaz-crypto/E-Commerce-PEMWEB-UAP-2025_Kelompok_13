@@ -2,16 +2,18 @@
 
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\StoreController; 
+use App\Http\Controllers\CartController; // Tambahkan ini jika nanti Controller Cart sudah jadi
 use Illuminate\Support\Facades\Route;
+use Illuminate\Http\Request; // [PENTING] Tambahkan ini untuk menangkap input tombol
 
 /*
 |--------------------------------------------------------------------------
-| Web Routes (MASTER - FINAL FIXED FLOW)
+| Web Routes (MASTER - MERGED FRONTEND & BACKEND)
 |--------------------------------------------------------------------------
 */
 
 // ==========================================
-// 1. CUSTOMER SIDE (HALAMAN PEMBELI)
+// 1. CUSTOMER SIDE (HALAMAN PUBLIK)
 // ==========================================
 
 // Homepage
@@ -27,9 +29,18 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/checkout', function () { return view('checkout'); })->name('checkout');
     Route::get('/history', function () { return view('history'); })->name('history');
 
-    // Logic Cart
-    Route::post('/cart/add-custom', function () { 
-        return redirect()->route('checkout'); 
+    // [FIXED] Logika Pembeda Tombol: Beli Sekarang vs Masuk Keranjang
+    // Menangkap Data dari Workshop
+    Route::post('/cart/add-custom', function (Request $request) { 
+        // Cek tombol mana yang diklik user (dikirim via name="action_type")
+        
+        if ($request->input('action_type') == 'buy') {
+            // Kalau klik 'Beli Sekarang' -> Langsung Checkout (Gas bayar)
+            return redirect()->route('checkout'); 
+        } else {
+            // Kalau klik 'Masuk Keranjang' -> Ke Wardrobe (Lanjut belanja/mikir dulu)
+            return redirect()->route('wardrobe'); 
+        }
     })->name('cart.add-custom');
 });
 
@@ -41,6 +52,7 @@ Route::middleware(['auth'])->group(function () {
 Route::middleware(['auth'])->group(function () {
 
     // GET: Menampilkan formulir pendaftaran Toko.
+    // Kalau StoreController belum dibuat backend, ganti baris ini jadi: function() { return view('seller.register'); }
     Route::get('/store/register', [StoreController::class, 'create'])->name('store.register');
 
     // POST: Memproses pendaftaran, INSERT data (termasuk sinkronisasi logo).
@@ -54,7 +66,7 @@ Route::middleware(['auth'])->group(function () {
         // Manajemen Produk (Upload)
         Route::get('/products/create', function () { return view('seller.products.create'); })->name('products.create');
 
-        // Pesanan Masuk
+        // Pesanan Masuk & Laporan
         Route::get('/orders', function () { return view('seller.orders'); })->name('orders');
 
         // Dompet & Penarikan Saldo
