@@ -1,7 +1,7 @@
 <x-app-layout>
     <x-slot name="header">
         <h2 class="font-extrabold text-xl text-gray-800 leading-tight">
-            {{ __('Tambah Produk Baru') }}
+            {{ __('Edit Produk: ') . $product->name }}
         </h2>
     </x-slot>
 
@@ -10,22 +10,24 @@
             
             <div class="mb-4 text-sm font-medium text-gray-600">
                 <a href="{{ route('seller.dashboard') }}" class="text-orange-500 hover:text-orange-600">Seller Panel</a> /
-                <span>Tambah Produk</span>
+                <span>Edit Produk</span>
             </div>
 
             <div class="bg-white rounded-[2rem] shadow-xl border border-gray-100 p-8">
                 
                 <h3 class="text-2xl font-extrabold text-gray-800 mb-6 border-b pb-4">
-                    Formulir Produk Baru
+                    Perbarui Detail Produk
                 </h3>
 
-                <form action="{{ route('seller.products.store') }}" method="POST" enctype="multipart/form-data">
+                <form action="{{ route('seller.products.update', $product) }}" method="POST" enctype="multipart/form-data">
                     @csrf
+                    @method('PUT') 
 
                     <div class="mb-5">
                         <label for="name" class="block text-sm font-medium text-gray-700 mb-2">Nama Produk</label>
                         <input type="text" id="name" name="name" 
-                               value="{{ old('name') }}"
+                               {{-- Mengisi nilai lama atau nilai saat ini dari database --}}
+                               value="{{ old('name', $product->name) }}"
                                class="w-full border-gray-300 rounded-xl shadow-sm focus:border-orange-500 focus:ring-orange-500 @error('name') border-red-500 @enderror" 
                                placeholder="Contoh: Kaos Merah UAP" required>
                         @error('name')
@@ -40,7 +42,9 @@
                                 required>
                             <option value="">-- Pilih Kategori --</option>
                             @foreach($categories as $category)
-                                <option value="{{ $category->id }}" {{ old('product_category_id') == $category->id ? 'selected' : '' }}>
+                                {{-- Menandai kategori yang sedang digunakan produk --}}
+                                @php $selected = old('product_category_id', $product->product_category_id) == $category->id ? 'selected' : '' @endphp
+                                <option value="{{ $category->id }}" {{ $selected }}>
                                     {{ $category->name }}
                                 </option>
                             @endforeach
@@ -54,7 +58,7 @@
                         <label for="description" class="block text-sm font-medium text-gray-700 mb-2">Deskripsi Produk</label>
                         <textarea id="description" name="description" rows="4" 
                                   class="w-full border-gray-300 rounded-xl shadow-sm focus:border-orange-500 focus:ring-orange-500 @error('description') border-red-500 @enderror" 
-                                  placeholder="Jelaskan produk Anda secara detail..." required>{{ old('description') }}</textarea>
+                                  placeholder="Jelaskan produk Anda secara detail..." required>{{ old('description', $product->description) }}</textarea>
                         @error('description')
                             <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                         @enderror
@@ -67,8 +71,9 @@
                                     class="w-full border-gray-300 rounded-xl shadow-sm focus:border-orange-500 focus:ring-orange-500 @error('condition') border-red-500 @enderror" 
                                     required>
                                 <option value="">-- Pilih Kondisi --</option>
-                                <option value="new" {{ old('condition') == 'new' ? 'selected' : '' }}>Baru (New)</option>
-                                <option value="second" {{ old('condition') == 'second' ? 'selected' : '' }}>Bekas (Second)</option>
+                                {{-- Menandai kondisi yang sedang digunakan produk --}}
+                                <option value="new" {{ old('condition', $product->condition) == 'new' ? 'selected' : '' }}>Baru (New)</option>
+                                <option value="second" {{ old('condition', $product->condition) == 'second' ? 'selected' : '' }}>Bekas (Second)</option>
                             </select>
                             @error('condition')
                                 <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
@@ -77,7 +82,7 @@
                         <div>
                             <label for="weight" class="block text-sm font-medium text-gray-700 mb-2">Berat (gram)</label>
                             <input type="number" id="weight" name="weight" 
-                                    value="{{ old('weight') }}"
+                                    value="{{ old('weight', $product->weight) }}"
                                     min="1"
                                     class="w-full border-gray-300 rounded-xl shadow-sm focus:border-orange-500 focus:ring-orange-500 @error('weight') border-red-500 @enderror" 
                                     placeholder="Contoh: 500 (gram)" required>
@@ -91,7 +96,7 @@
                         <div>
                             <label for="price" class="block text-sm font-medium text-gray-700 mb-2">Harga (Rp)</label>
                             <input type="number" id="price" name="price" 
-                                    value="{{ old('price') }}"
+                                    value="{{ old('price', $product->price) }}"
                                     min="1000" step="1000"
                                     class="w-full border-gray-300 rounded-xl shadow-sm focus:border-orange-500 focus:ring-orange-500 @error('price') border-red-500 @enderror" 
                                     placeholder="Contoh: 75000" required>
@@ -102,8 +107,8 @@
                         <div>
                             <label for="stock" class="block text-sm font-medium text-gray-700 mb-2">Stok Gudang (pcs)</label>
                             <input type="number" id="stock" name="stock" 
-                                    value="{{ old('stock') }}"
-                                    min="1"
+                                    value="{{ old('stock', $product->stock) }}"
+                                    min="0"
                                     class="w-full border-gray-300 rounded-xl shadow-sm focus:border-orange-500 focus:ring-orange-500 @error('stock') border-red-500 @enderror" 
                                     placeholder="Contoh: 120" required>
                             @error('stock')
@@ -112,14 +117,20 @@
                         </div>
                     </div>
                     
-                    <div class="mb-8">
-                        <label for="image" class="block text-sm font-medium text-gray-700 mb-2">Gambar Produk</label>
+                    <div class="mb-8 p-4 border border-gray-200 rounded-xl bg-gray-50">
+                        <p class="text-sm font-medium text-gray-700 mb-3">Gambar Saat Ini:</p>
+                        @if($product->image)
+                            <img src="{{ Storage::url($product->image) }}" alt="Gambar Produk" class="h-32 w-32 object-cover rounded-lg mb-4 border border-gray-300">
+                        @else
+                            <p class="text-xs text-gray-500 mb-3">Belum ada gambar yang diupload.</p>
+                        @endif
+                        
+                        <label for="image" class="block text-sm font-medium text-gray-700 mb-2">Upload Gambar Baru (Opsional)</label>
                         <input type="file" id="image" name="image" accept="image/*"
-                                class="w-full file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-orange-50 file:text-orange-700 hover:file:bg-orange-100 cursor-pointer border-gray-300 rounded-xl shadow-sm @error('image') border-red-500 @enderror" required>
+                               class="w-full file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-orange-50 file:text-orange-700 hover:file:bg-orange-100 cursor-pointer border-gray-300 rounded-xl shadow-sm @error('image') border-red-500 @enderror">
                         @error('image')
                             <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                         @enderror
-                        <p class="mt-1 text-xs text-gray-500">Maksimal 2MB (jpeg, png, jpg).</p>
                     </div>
                     
 
@@ -127,8 +138,8 @@
                         <a href="{{ route('seller.dashboard') }}" class="px-6 py-3 border border-gray-300 rounded-xl text-gray-700 font-bold hover:bg-gray-100 transition">
                             Batal
                         </a>
-                        <button type="submit" class="bg-orange-600 text-white px-8 py-3 rounded-xl font-bold hover:bg-orange-700 transition shadow-lg">
-                            Simpan Produk
+                        <button type="submit" class="bg-blue-600 text-white px-8 py-3 rounded-xl font-bold hover:bg-blue-700 transition shadow-lg">
+                            Perbarui Produk
                         </button>
                     </div>
 

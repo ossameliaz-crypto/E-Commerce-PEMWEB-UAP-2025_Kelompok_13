@@ -2,11 +2,12 @@
 
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\StoreController; 
+use App\Http\Controllers\ProductController; 
 use Illuminate\Support\Facades\Route;
 
 /*
 |--------------------------------------------------------------------------
-| Web Routes (MASTER - FINAL FIXED FLOW)
+| Web Routes (FINAL VERSION)
 |--------------------------------------------------------------------------
 */
 
@@ -14,10 +15,7 @@ use Illuminate\Support\Facades\Route;
 // 1. CUSTOMER SIDE (HALAMAN PEMBELI)
 // ==========================================
 
-// Homepage
 Route::get('/', function () { return view('welcome'); })->name('home');
-
-// Workshop & Inventory (Diasumsikan hanya menampilkan view)
 Route::get('/workshop', function () { return view('builder'); })->name('workshop');
 Route::get('/wardrobe', function () { return view('wardrobe'); })->name('wardrobe');
 
@@ -38,28 +36,29 @@ Route::middleware(['auth'])->group(function () {
 // 2. SELLER SIDE (HALAMAN PENJUAL)
 // ==========================================
 
+// Pendaftaran Toko: Semua user terautentikasi bisa mengakses
 Route::middleware(['auth'])->group(function () {
-
-    // GET: Menampilkan formulir pendaftaran Toko.
     Route::get('/store/register', [StoreController::class, 'create'])->name('store.register');
+    Route::post('/store', [StoreController::class, 'store'])->name('store.create'); 
+});
 
-    // POST: Memproses pendaftaran, INSERT data (termasuk sinkronisasi logo).
-    Route::post('/store/create', [StoreController::class, 'store'])->name('store.create'); 
 
-    // Area Seller: Harus memiliki role 'seller'
-    Route::prefix('seller')->name('seller.')->group(function () {
-        // Dashboard Utama Seller (GET)
-        Route::get('/dashboard', function () { return view('seller.dashboard'); })->name('dashboard');
+// Area Seller: Harus memiliki role 'seller'
+// 🛑 PERBAIKAN: Menggunakan alias 'role:seller' (sesuai pendaftaran di bootstrap/app.php)
+Route::middleware(['auth', 'role:seller'])->prefix('seller')->name('seller.')->group(function () {
+    
+    // Dashboard Utama Seller
+    Route::get('/dashboard', [ProductController::class, 'index'])->name('dashboard');
 
-        // Manajemen Produk (Upload)
-        Route::get('/products/create', function () { return view('seller.products.create'); })->name('products.create');
+    // Manajemen Produk (CRUD Lengkap)
+    // Rute: /seller/products, /seller/products/create, dll.
+    Route::resource('products', ProductController::class)->except(['show']); 
+    
+    // Pesanan Masuk
+    Route::get('/orders', function () { return view('seller.orders'); })->name('orders');
 
-        // Pesanan Masuk
-        Route::get('/orders', function () { return view('seller.orders'); })->name('orders');
-
-        // Dompet & Penarikan Saldo
-        Route::get('/withdrawals', function () { return view('seller.withdrawals'); })->name('withdrawals');
-    });
+    // Dompet & Penarikan Saldo
+    Route::get('/withdrawals', function () { return view('seller.withdrawals'); })->name('withdrawals');
 });
 
 
@@ -68,13 +67,14 @@ Route::middleware(['auth'])->group(function () {
 // ==========================================
 
 // Harus dilindungi oleh middleware role 'admin' 
+// 🛑 PERBAIKAN: Menggunakan alias 'role:admin'
 Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->group(function () {
     Route::get('/dashboard', function () { return view('admin.dashboard'); })->name('dashboard');
 });
 
 
 // ==========================================
-// 4. AUTHENTICATION & USER PROFILE (DEFAULT LARAVEL)
+// 4. AUTHENTICATION & USER PROFILE 
 // ==========================================
 
 // Dashboard User Biasa (Setelah Login)
@@ -82,18 +82,14 @@ Route::get('/dashboard', function () { return view('dashboard'); })->middleware(
 
 // Profil User & Update
 Route::middleware('auth')->group(function () {
-    // Profil Info, Update, Delete
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
-    
-    // Update Foto Profil/Logo Toko 
     Route::patch('/profile/update-image', [ProfileController::class, 'updateImage'])->name('profile.update-image'); 
-
-    // Route ini diperlukan untuk form Update Password di halaman profil
     Route::put('/password', [ProfileController::class, 'updatePassword'])->name('password.update');
 });
 
 
 // Load file auth bawaan (Login/Register logic)
+// Pastikan file auth.php yang Anda tunjukkan sebelumnya TIDAK mengandung Route Resource produk yang duplikat
 require __DIR__.'/auth.php';

@@ -11,6 +11,7 @@ use App\Http\Controllers\Auth\RegisteredUserController;
 use App\Http\Controllers\Auth\VerifyEmailController;
 use Illuminate\Support\Facades\Route;
 
+// --- ROUTE GUEST (Pengunjung yang belum login) ---
 Route::middleware('guest')->group(function () {
     Route::get('register', [RegisteredUserController::class, 'create'])
                 ->name('register');
@@ -35,7 +36,10 @@ Route::middleware('guest')->group(function () {
                 ->name('password.store');
 });
 
+// --- ROUTE AUTH (Pengguna yang sudah login) ---
 Route::middleware('auth')->group(function () {
+    // ROUTE AUTH STANDAR (Verifikasi Email, Logout, Ganti Password)
+
     Route::get('verify-email', EmailVerificationPromptController::class)
                 ->name('verification.notice');
 
