@@ -1,20 +1,18 @@
 <x-app-layout>
     <x-slot name="header">
+<<<<<<< HEAD
         <h2 class="font-extrabold text-xl text-gray-800 leading-tight">
             {{ __('Dashboard Saya') }}
+=======
+        <h2 class="font-semibold text-xl text-gray-800 dark:text-gray-200 leading-tight">
+            {{ __('Dashboard') }}
+>>>>>>> fd825a2533336941b322560aac78028f655f2aef
         </h2>
     </x-slot>
 
-    <!-- LOGIKA DATA DUMMY -->
-    @php
-        $isNewUser = true; // Ubah ke false untuk tes tampilan user lama
-        
-        $saldo = $isNewUser ? 0 : 1500000;
-        $pesanan_aktif = $isNewUser ? 0 : 1;
-    @endphp
-
-    <div class="py-12 bg-orange-50/30 min-h-screen">
+    <div class="py-12">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
+<<<<<<< HEAD
             
             <!-- 1. WELCOME BANNER -->
             <div class="bg-gradient-to-r from-orange-500 to-red-500 rounded-[2rem] p-8 text-white shadow-xl mb-10 relative overflow-hidden">
@@ -125,6 +123,13 @@
 
             </div>
 
+=======
+            <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg">
+                <div class="p-6 text-gray-900 dark:text-gray-100">
+                    {{ __("You're logged in!") }}
+                </div>
+            </div>
+>>>>>>> fd825a2533336941b322560aac78028f655f2aef
         </div>
     </div>
 </x-app-layout>
