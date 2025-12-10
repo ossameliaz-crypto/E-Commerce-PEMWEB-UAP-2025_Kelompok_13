@@ -3,7 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Laporan Penjualan - Seller Panel</title>
+    {{-- JUDUL HALAMAN BERUBAH --}}
+    <title>Pesanan - Seller Panel</title>
+    
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
@@ -14,25 +16,34 @@
 </head>
 <body class="bg-gray-50 min-h-screen font-sans text-gray-800">
 
-    <!-- x-data ditambah untuk Modal Restock -->
     <div class="flex" x-data="{ openRestockModal: false, selectedProductRestock: '' }">
         
-        <!-- SIDEBAR -->
         <aside class="w-64 bg-white border-r border-gray-200 min-h-screen hidden md:block fixed z-10">
             <div class="h-20 flex items-center px-8 border-b border-gray-100">
                 <span class="text-2xl mr-2">🧸</span>
                 <span class="font-extrabold text-orange-600 text-lg">Seller Panel</span>
             </div>
             <nav class="p-4 space-y-2 mt-4">
+                {{-- Link Dashboard --}}
                 <a href="{{ route('seller.dashboard') }}" class="flex items-center gap-3 px-4 py-3 text-gray-500 hover:bg-gray-50 hover:text-gray-900 font-bold rounded-xl transition">
-                    <span>📦</span> Produk Saya
+                    <span>🏠</span> Dashboard
                 </a>
-                <a href="#" class="flex items-center gap-3 px-4 py-3 bg-orange-50 text-orange-700 font-bold rounded-xl transition shadow-sm border border-orange-100">
-                    <span>📄</span> Laporan Penjualan
+                
+                {{-- Link Produk Saya --}}
+                <a href="{{ route('seller.products.index') }}" class="flex items-center gap-3 px-4 py-3 text-gray-500 hover:bg-gray-50 hover:text-gray-900 font-bold rounded-xl transition">
+                    <span>📦</span> Produk
                 </a>
+
+                {{-- Link Pesanan (ACTIVE) --}}
+                <a href="{{ route('seller.orders') }}" class="flex items-center gap-3 px-4 py-3 bg-orange-50 text-orange-700 font-bold rounded-xl transition shadow-sm border border-orange-100">
+                    <span>💰</span> Pesanan
+                </a>
+                
+                {{-- Link Dompet Saya --}}
                 <a href="{{ route('seller.withdrawals') }}" class="flex items-center gap-3 px-4 py-3 text-gray-500 hover:bg-gray-50 hover:text-gray-900 font-bold rounded-xl transition">
-                    <span>💰</span> Dompet Saya
+                    <span>⚙️</span> Dompet
                 </a>
+                
                 <div class="pt-8 mt-8 border-t border-gray-100">
                     <a href="{{ url('/') }}" class="flex items-center gap-3 px-4 py-3 text-gray-400 hover:text-orange-600 font-bold text-sm transition">
                         <span>⬅️</span> Kembali ke Toko
@@ -41,22 +52,24 @@
             </nav>
         </aside>
 
-        <!-- MAIN CONTENT -->
         <main class="flex-1 md:ml-64 p-8">
             
-            <div class="mb-8 flex justify-between items-end">
+            <a href="{{ route('seller.dashboard') }}" class="text-gray-500 hover:text-orange-600 font-bold text-sm mb-6 inline-flex items-center gap-1 transition">
+                <span>⬅️</span> Kembali ke Dashboard
+            </a>
+
+            <div class="mb-8 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                 <div>
-                    <h1 class="text-3xl font-extrabold text-gray-800">Laporan Penjualan</h1>
+                    {{-- JUDUL KONTEN BERUBAH --}}
+                    <h1 class="text-3xl font-extrabold text-gray-800">Daftar Pesanan</h1>
                     <p class="text-gray-500 mt-1">Pantau barangmu yang laku dan sedang diproses oleh Gudang Pusat.</p>
                 </div>
                 
-                <!-- TOMBOL KIRIM STOK BARU -->
-                <button @click="openRestockModal = true; selectedProductRestock = ''" class="bg-gray-900 text-white px-6 py-3 rounded-xl font-bold shadow-lg hover:bg-gray-800 transition transform hover:-translate-y-1 flex items-center gap-2">
+                <button @click="openRestockModal = true; selectedProductRestock = ''" class="bg-orange-600 text-white px-6 py-3 rounded-xl font-bold shadow-lg shadow-orange-500/30 hover:bg-orange-700 transition transform hover:-translate-y-1 flex items-center gap-2">
                     <span>📦</span> Kirim Stok ke Gudang
                 </button>
             </div>
 
-            <!-- STOCK ALERT (TAMPILAN BARU: PEMBERITAHUAN STOK HABIS) -->
             <div class="bg-red-50 border-l-4 border-red-500 p-6 mb-8 rounded-r-xl shadow-sm">
                 <div class="flex items-start">
                     <div class="flex-shrink-0 text-red-500 text-xl">⚠️</div>
@@ -66,11 +79,10 @@
                             Produk berikut telah habis di Gudang Pusat. Produk otomatis <b>disembunyikan/dinonaktifkan</b> dari katalog pembeli sampai stok tersedia kembali.
                         </p>
                         
-                        <div class="flex gap-4">
-                            <!-- Item Habis 1 -->
-                            <div class="bg-white p-3 rounded-lg border border-red-200 flex items-center justify-between shadow-sm w-full md:w-1/2">
+                        <div class="flex flex-col md:flex-row gap-4">
+                            <div class="bg-white p-3 rounded-xl border border-red-200 flex items-center justify-between shadow-sm w-full md:w-1/2">
                                 <div class="flex items-center gap-3">
-                                    <div class="w-10 h-10 bg-gray-100 rounded-md flex items-center justify-center">👗</div>
+                                    <div class="w-10 h-10 bg-gray-100 rounded-lg flex items-center justify-center text-lg">👗</div>
                                     <div>
                                         <p class="font-bold text-gray-800 text-sm">Dress Pink</p>
                                         <p class="text-xs text-red-600 font-bold">Stok Gudang: 0</p>
@@ -81,10 +93,9 @@
                                 </button>
                             </div>
                             
-                            <!-- Item Habis 2 -->
-                            <div class="bg-white p-3 rounded-lg border border-yellow-200 flex items-center justify-between shadow-sm w-full md:w-1/2">
+                            <div class="bg-white p-3 rounded-xl border border-yellow-200 flex items-center justify-between shadow-sm w-full md:w-1/2">
                                 <div class="flex items-center gap-3">
-                                    <div class="w-10 h-10 bg-gray-100 rounded-md flex items-center justify-center">🎩</div>
+                                    <div class="w-10 h-10 bg-gray-100 rounded-lg flex items-center justify-center text-lg">🎩</div>
                                     <div>
                                         <p class="font-bold text-gray-800 text-sm">Topi Sulap</p>
                                         <p class="text-xs text-yellow-600 font-bold">Stok Gudang: 2 (Menipis)</p>
@@ -99,7 +110,6 @@
                 </div>
             </div>
 
-            <!-- TABEL PENJUALAN -->
             <div class="bg-white rounded-[2rem] shadow-sm border border-gray-100 overflow-hidden">
                 <div class="overflow-x-auto">
                     <table class="w-full text-left border-collapse">
@@ -114,7 +124,6 @@
                         </thead>
                         <tbody class="divide-y divide-gray-50 text-sm">
                             
-                            <!-- ITEM 1: Baru Masuk -->
                             <tr class="hover:bg-orange-50/30 transition">
                                 <td class="px-8 py-5 text-gray-500">07 Des 2025</td>
                                 <td class="px-6 py-5">
@@ -138,7 +147,6 @@
                                 </td>
                             </tr>
 
-                            <!-- ITEM 2: Sudah Dikirim Admin -->
                             <tr class="hover:bg-orange-50/30 transition bg-gray-50/50">
                                 <td class="px-8 py-5 text-gray-500">05 Des 2025</td>
                                 <td class="px-6 py-5">
@@ -164,10 +172,13 @@
                         </tbody>
                     </table>
                 </div>
+                
+                <div class="p-4 border-t border-gray-100 text-center text-xs text-gray-400">
+                    Menampilkan 2 dari 2 pesanan.
+                </div>
             </div>
         </main>
 
-        <!-- MODAL RESTOCK (PENGIRIMAN DARI SELLER KE GUDANG) -->
         <div x-show="openRestockModal" 
              class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm" 
              x-cloak x-transition>
@@ -179,7 +190,6 @@
                 <h3 class="text-2xl font-extrabold text-gray-800 mb-2">Kirim Stok ke Gudang</h3>
                 <p class="text-gray-500 text-sm mb-6">Silakan kirim barang fisik Anda ke alamat berikut:</p>
 
-                <!-- Alamat Gudang -->
                 <div class="bg-orange-50 border-2 border-orange-200 border-dashed rounded-xl p-4 mb-6 relative">
                     <p class="font-bold text-orange-800 text-sm uppercase mb-1">📍 Alamat Gudang Pusat</p>
                     <p class="text-gray-700 font-bold">Build-A-Teddy Fulfillment Center</p>
@@ -191,7 +201,6 @@
                     <div class="space-y-4">
                         <div>
                             <label class="block text-sm font-bold text-gray-700 mb-1">Produk yang Dikirim</label>
-                            <!-- x-model biar otomatis terpilih kalau klik dari alert merah -->
                             <select x-model="selectedProductRestock" class="w-full p-3 rounded-xl border border-gray-300 focus:ring-2 focus:ring-orange-500 outline-none bg-white">
                                 <option value="" disabled selected>Pilih Produk...</option>
                                 <option value="Dress Pink">Dress Pink (Habis)</option>
@@ -216,7 +225,7 @@
                             <p class="text-xs text-gray-400 mt-1">*Admin akan memverifikasi stok setelah barang sampai.</p>
                         </div>
 
-                        <button type="button" @click="openRestockModal = false; alert('Konfirmasi terkirim! Admin akan mengecek barang Anda saat sampai.')" class="w-full bg-gray-900 text-white font-bold py-4 rounded-xl hover:bg-gray-800 transition shadow-lg mt-2">
+                        <button type="button" @click="openRestockModal = false; alert('Konfirmasi terkirim! Admin akan mengecek barang Anda saat sampai.')" class="w-full bg-orange-600 text-white font-bold py-4 rounded-xl hover:bg-orange-700 transition shadow-lg mt-2">
                             Konfirmasi Pengiriman
                         </button>
                     </div>
