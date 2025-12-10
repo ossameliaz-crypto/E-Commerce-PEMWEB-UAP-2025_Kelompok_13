@@ -1,7 +1,7 @@
 <x-app-layout>
     <x-slot name="header">
         <h2 class="font-extrabold text-xl text-gray-800 leading-tight">
-            {{ __('Dashboard Saya') }}
+            {{ Auth::user()->role === 'seller' ? __('Seller Panel') : __('Dashboard Saya') }}
         </h2>
     </x-slot>
 
@@ -16,7 +16,6 @@
     <div class="py-12 bg-orange-50/30 min-h-screen">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
             
-            <!-- 1. WELCOME BANNER -->
             <div class="bg-gradient-to-r from-orange-500 to-red-500 rounded-[2rem] p-8 text-white shadow-xl mb-10 relative overflow-hidden">
                 <div class="absolute top-0 right-0 w-64 h-64 bg-white opacity-10 rounded-full -mr-16 -mt-16 pointer-events-none"></div>
                 <div class="absolute bottom-0 left-0 w-40 h-40 bg-white opacity-10 rounded-full -ml-10 -mb-10 pointer-events-none"></div>
@@ -24,15 +23,7 @@
                 <div class="relative z-10 flex flex-col md:flex-row items-center justify-between gap-6">
                     <div>
                         <h3 class="text-3xl font-extrabold mb-2">Halo, {{ Auth::user()->name }}! 👋</h3>
-                        <p class="text-orange-100 text-lg">
-                            @if(Auth::user()->role === 'seller')
-                                Semangat jualan hari ini! Cek pesanan masuk yuk.
-                            @elseif($isNewUser)
-                                Selamat datang! Yuk mulai buat boneka pertamamu.
-                            @else
-                                Siap menambah koleksi teman bulu barumu hari ini?
-                            @endif
-                        </p>
+                        <p class="text-orange-100 text-lg">Siap menambah koleksi teman bulu barumu hari ini?</p>
                     </div>
                     
                     @if(Auth::user()->role !== 'seller')
@@ -47,14 +38,21 @@
                 </div>
             </div>
 
-            <!-- 2. STATISTIK -->
-            <div class="grid grid-cols-1 {{ Auth::user()->role === 'seller' ? 'md:grid-cols-2' : 'md:grid-cols-1' }} gap-6 mb-10">
-                
-                <!-- KARTU SALDO (KHUSUS SELLER) -->
-                @if(Auth::user()->role === 'seller')
-                <div class="bg-white p-6 rounded-3xl shadow-sm border border-gray-100 flex items-center gap-4 hover:shadow-md transition relative overflow-hidden group">
-                    <div class="absolute right-0 top-0 p-4 opacity-10 text-6xl group-hover:scale-110 transition">💰</div>
-                    <div class="w-16 h-16 bg-green-100 rounded-2xl flex items-center justify-center text-3xl text-green-600">💸</div>
+            <!-- 2. STATISTIK (SALDO & KOLEKSI) -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
+                <!-- Kartu Saldo -->
+                <div class="bg-white p-6 rounded-3xl shadow-sm border border-gray-100 flex items-center gap-4 hover:shadow-md transition">
+                    <div class="w-16 h-16 bg-green-100 rounded-2xl flex items-center justify-center text-3xl">💰</div>
+                    <div>
+                        <p class="text-xs font-bold text-gray-400 uppercase tracking-wider">Saldo Wallet</p>
+                        <h4 class="text-2xl font-extrabold text-gray-800">Rp {{ number_format(Auth::user()->balance ?? 0, 0, ',', '.') }}</h4>
+                        <a href="{{ route('payment') }}" class="text-xs font-bold text-green-600 hover:underline">+ Isi Saldo</a>
+                    </div>
+                </div>
+
+                <!-- Kartu Koleksi -->
+                <div class="bg-white p-6 rounded-3xl shadow-sm border border-gray-100 flex items-center gap-4 hover:shadow-md transition">
+                    <div class="w-16 h-16 bg-blue-100 rounded-2xl flex items-center justify-center text-3xl">🧥</div>
                     <div>
                         <p class="text-xs font-bold text-gray-400 uppercase tracking-wider">Pendapatan Toko</p>
                         <h4 class="text-2xl font-extrabold text-gray-800">Rp {{ number_format($saldo, 0, ',', '.') }}</h4>
@@ -63,9 +61,8 @@
                         </a>
                     </div>
                 </div>
-                @endif
 
-                <!-- KARTU STATUS PESANAN (SEMUA USER) -->
+                <!-- Kartu Status Pesanan -->
                 <div class="bg-white p-6 rounded-3xl shadow-sm border border-gray-100 flex items-center gap-4 hover:shadow-md transition">
                     <div class="w-16 h-16 bg-orange-100 rounded-2xl flex items-center justify-center text-3xl">📦</div>
                     <div>
@@ -76,51 +73,66 @@
                 </div>
             </div>
 
-            <!-- 3. AKTIVITAS TERBARU (Full Width) -->
-            <div class="w-full">
+            <!-- 3. AKTIVITAS TERBARU -->
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
                 
-                <!-- Riwayat Transaksi -->
-                <div class="bg-white rounded-[2rem] shadow-sm border border-gray-100 p-8 min-h-[300px]">
-                    <div class="flex justify-between items-center mb-6">
-                        <h4 class="font-extrabold text-gray-800 text-lg">Riwayat Belanja Terakhir</h4>
-                        @if(!$isNewUser)
-                            <a href="{{ route('history') }}" class="text-sm font-bold text-orange-600 hover:underline">Lihat Semua</a>
-                        @endif
-                    </div>
+                <!-- Kiri: Riwayat Transaksi -->
+                <div class="lg:col-span-2 bg-white rounded-[2rem] shadow-sm border border-gray-100 p-8">
+                    <h4 class="font-extrabold text-gray-800 text-lg mb-6">Riwayat Belanja Terakhir</h4>
                     
-                    @if($isNewUser)
-                        <div class="flex flex-col items-center justify-center h-48 text-center">
-                            <div class="w-20 h-20 bg-gray-50 rounded-full flex items-center justify-center text-4xl mb-4 grayscale opacity-50">🛒</div>
-                            <p class="text-gray-800 font-bold">Belum ada riwayat belanja.</p>
-                            <p class="text-gray-400 text-sm mb-4">Yuk cari boneka pertamamu!</p>
-                            <a href="{{ route('workshop') }}" class="px-6 py-2 bg-orange-100 text-orange-700 rounded-full text-sm font-bold hover:bg-orange-200 transition">
-                                Mulai Belanja
+                    <div class="space-y-4">
+                        <!-- Item Dummy 1 -->
+                        <div class="flex items-center justify-between p-4 bg-gray-50 rounded-2xl hover:bg-orange-50 transition cursor-pointer">
+                            <div class="flex items-center gap-4">
+                                <div class="w-12 h-12 bg-white rounded-xl flex items-center justify-center text-xl shadow-sm">🧸</div>
+                                <div>
+                                    <p class="font-bold text-gray-800">Custom Teddy (Coklat)</p>
+                                    <p class="text-xs text-gray-500">22 Des 2025 • #TRX-88291</p>
+                                </div>
+                            </div>
+                            <span class="px-3 py-1 bg-green-100 text-green-700 text-xs font-bold rounded-full">Selesai</span>
+                        </div>
+
+                        <!-- Item Dummy 2 -->
+                        <div class="flex items-center justify-between p-4 bg-gray-50 rounded-2xl hover:bg-orange-50 transition cursor-pointer">
+                            <div class="flex items-center gap-4">
+                                <div class="w-12 h-12 bg-white rounded-xl flex items-center justify-center text-xl shadow-sm">👕</div>
+                                <div>
+                                    <p class="font-bold text-gray-800">Kaos Merah UAP</p>
+                                    <p class="text-xs text-gray-500">20 Des 2025 • #TRX-11029</p>
+                                </div>
+                            </div>
+                            <span class="px-3 py-1 bg-blue-100 text-blue-700 text-xs font-bold rounded-full">Dikirim</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Kanan: Menu Cepat -->
+                <div class="bg-white rounded-[2rem] shadow-sm border border-gray-100 p-8">
+                    <h4 class="font-extrabold text-gray-800 text-lg mb-6">Akses Cepat</h4>
+                    <div class="space-y-3">
+                        <a href="{{ route('workshop') }}" class="block w-full py-3 px-4 bg-gray-50 hover:bg-orange-100 rounded-xl text-gray-700 font-bold text-sm transition flex justify-between items-center group">
+                            <span>🎨 Mulai Kustomisasi</span>
+                            <span class="text-gray-400 group-hover:text-orange-500">➔</span>
+                        </a>
+                        <a href="{{ route('wardrobe') }}" class="block w-full py-3 px-4 bg-gray-50 hover:bg-blue-100 rounded-xl text-gray-700 font-bold text-sm transition flex justify-between items-center group">
+                            <span>🧥 Ganti Baju Boneka</span>
+                            <span class="text-gray-400 group-hover:text-blue-500">➔</span>
+                        </a>
+                        <a href="{{ route('profile.edit') }}" class="block w-full py-3 px-4 bg-gray-50 hover:bg-gray-100 rounded-xl text-gray-700 font-bold text-sm transition flex justify-between items-center group">
+                            <span>⚙️ Pengaturan Akun</span>
+                            <span class="text-gray-400 group-hover:text-gray-600">➔</span>
+                        </a>
+                        
+                        <!-- CTA Buka Toko (Jika bukan seller) -->
+                        @if(Auth::user()->role !== 'seller')
+                        <div class="pt-4 mt-4 border-t border-gray-100">
+                            <a href="{{ route('store.register') }}" class="block w-full py-3 px-4 bg-gradient-to-r from-orange-500 to-red-500 text-white rounded-xl font-bold text-sm text-center shadow-lg hover:shadow-orange-500/30 transition transform hover:-translate-y-1">
+                                ✨ Buka Toko Sendiri
                             </a>
                         </div>
-                    @else
-                        <div class="space-y-4">
-                            <div class="flex items-center justify-between p-4 bg-gray-50 rounded-2xl hover:bg-orange-50 transition cursor-pointer">
-                                <div class="flex items-center gap-4">
-                                    <div class="w-12 h-12 bg-white rounded-xl flex items-center justify-center text-xl shadow-sm">🧸</div>
-                                    <div>
-                                        <p class="font-bold text-gray-800">Custom Teddy (Coklat)</p>
-                                        <p class="text-xs text-gray-500">22 Des 2025 • #TRX-88291</p>
-                                    </div>
-                                </div>
-                                <span class="px-3 py-1 bg-green-100 text-green-700 text-xs font-bold rounded-full">Selesai</span>
-                            </div>
-                            <div class="flex items-center justify-between p-4 bg-gray-50 rounded-2xl hover:bg-orange-50 transition cursor-pointer">
-                                <div class="flex items-center gap-4">
-                                    <div class="w-12 h-12 bg-white rounded-xl flex items-center justify-center text-xl shadow-sm">👕</div>
-                                    <div>
-                                        <p class="font-bold text-gray-800">Kaos Merah UAP</p>
-                                        <p class="text-xs text-gray-500">20 Des 2025 • #TRX-11029</p>
-                                    </div>
-                                </div>
-                                <span class="px-3 py-1 bg-blue-100 text-blue-700 text-xs font-bold rounded-full">Dikirim</span>
-                            </div>
-                        </div>
-                    @endif
+                        @endif
+                    </div>
                 </div>
 
             </div>

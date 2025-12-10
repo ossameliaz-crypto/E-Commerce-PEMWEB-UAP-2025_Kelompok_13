@@ -86,7 +86,7 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
 
 
 // ==========================================
-// 4. AUTHENTICATION & USER PROFILE (DEFAULT LARAVEL)
+// 4. AUTHENTICATION & USER PROFILE (DEFAULT LARAzVEL)
 // ==========================================
 
 // Dashboard User Biasa (Setelah Login)
