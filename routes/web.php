@@ -2,9 +2,10 @@
 
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\StoreController; 
-use App\Http\Controllers\CartController; // Tambahkan ini jika nanti Controller Cart sudah jadi
+use App\Http\Controllers\ProductController; // Digunakan untuk CRUD Produk
+use App\Http\Controllers\CartController; 
 use Illuminate\Support\Facades\Route;
-use Illuminate\Http\Request; // [PENTING] Tambahkan ini untuk menangkap input tombol
+use Illuminate\Http\Request; 
 
 /*
 |--------------------------------------------------------------------------
@@ -29,16 +30,11 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/checkout', function () { return view('checkout'); })->name('checkout');
     Route::get('/history', function () { return view('history'); })->name('history');
 
-    // [FIXED] Logika Pembeda Tombol: Beli Sekarang vs Masuk Keranjang
-    // Menangkap Data dari Workshop
+    // Logika Pembeda Tombol: Beli Sekarang vs Masuk Keranjang
     Route::post('/cart/add-custom', function (Request $request) { 
-        // Cek tombol mana yang diklik user (dikirim via name="action_type")
-        
         if ($request->input('action_type') == 'buy') {
-            // Kalau klik 'Beli Sekarang' -> Langsung Checkout (Gas bayar)
             return redirect()->route('checkout'); 
         } else {
-            // Kalau klik 'Masuk Keranjang' -> Ke Wardrobe (Lanjut belanja/mikir dulu)
             return redirect()->route('wardrobe'); 
         }
     })->name('cart.add-custom');
@@ -51,11 +47,8 @@ Route::middleware(['auth'])->group(function () {
 
 Route::middleware(['auth'])->group(function () {
 
-    // GET: Menampilkan formulir pendaftaran Toko.
-    // Kalau StoreController belum dibuat backend, ganti baris ini jadi: function() { return view('seller.register'); }
+    // Registrasi Toko (GET & POST)
     Route::get('/store/register', [StoreController::class, 'create'])->name('store.register');
-
-    // POST: Memproses pendaftaran, INSERT data (termasuk sinkronisasi logo).
     Route::post('/store/create', [StoreController::class, 'store'])->name('store.create'); 
 
     // Area Seller: Harus memiliki role 'seller'
@@ -63,8 +56,12 @@ Route::middleware(['auth'])->group(function () {
         // Dashboard Utama Seller (GET)
         Route::get('/dashboard', function () { return view('seller.dashboard'); })->name('dashboard');
 
-        // Manajemen Produk (Upload)
-        Route::get('/products/create', function () { return view('seller.products.create'); })->name('products.create');
+        // 🎯 PERBAIKAN KRUSIAL: Manajemen Produk (Resource Route)
+        // Menggantikan Route::get('/products/create', ...)
+        // Ini mendaftarkan seller.products.index, seller.products.create, dan seller.products.store (POST)
+        Route::resource('products', ProductController::class)
+            ->only(['index', 'create', 'store', 'edit', 'update', 'destroy'])
+            ->names('products');
 
         // Pesanan Masuk & Laporan
         Route::get('/orders', function () { return view('seller.orders'); })->name('orders');
@@ -86,7 +83,7 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
 
 
 // ==========================================
-// 4. AUTHENTICATION & USER PROFILE (DEFAULT LARAzVEL)
+// 4. AUTHENTICATION & USER PROFILE (DEFAULT LARAVEL)
 // ==========================================
 
 // Dashboard User Biasa (Setelah Login)

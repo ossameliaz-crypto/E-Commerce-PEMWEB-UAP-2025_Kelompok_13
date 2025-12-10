@@ -24,7 +24,6 @@ class Product extends Model
         'price',
         'weight',
         'stock',
-        'image', 
     ];
 
     // Casting untuk konversi tipe data otomatis
