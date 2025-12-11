@@ -10,11 +10,20 @@
         body { font-family: 'Nunito', sans-serif; }
         [x-cloak] { display: none !important; }
         .timeline-line { position: absolute; left: 15px; top: 30px; bottom: 0; width: 2px; background: #e5e7eb; z-index: 0; }
+        .text-orange-600 { color: #ea580c; }
+        .bg-orange-100 { background-color: #ffedd5; }
+        .bg-orange-50 { background-color: #fff7ed; }
+        .bg-orange-500 { background-color: #f97316; }
     </style>
+    <script>
+        window.formatRupiah = (angka) => {
+            const number = Number(angka) || 0;
+            return 'Rp ' + number.toLocaleString('id-ID');
+        };
+    </script>
 </head>
 <body class="bg-gray-50 min-h-screen">
 
-    <!-- Navbar -->
     <nav class="bg-white border-b border-gray-200 h-16 flex items-center px-6 sticky top-0 z-50">
         <a href="{{ url('/') }}" class="flex items-center gap-2">
             <span class="text-3xl">🧸</span>
@@ -28,75 +37,87 @@
 
     <div class="max-w-4xl mx-auto p-6 md:p-10" 
          x-data="{ 
-            activeTab: 'all', // all, dikirim, selesai
-            showTrackModal: false,
-            showReviewModal: false,
-            selectedOrder: null,
-            rating: 0,
-            
-            // Data Dummy Pesanan
-            orders: [
-                { 
-                    id: 'TRX-88291', date: '22 Des 2025', total: 175000, status: 'dikirim', resi: 'JP1234567890',
-                    items: [ { name: 'Custom Teddy (Coklat)', desc: '+ Kaos Merah & Kacamata' } ]
-                },
-                { 
-                    id: 'TRX-11029', date: '10 Des 2025', total: 55000, status: 'selesai', resi: 'JP9876543210',
-                    items: [ { name: 'Hoodie Biru', desc: 'Size: M' } ],
-                    review: null // Belum direview
-                }
-            ],
+             activeTab: 'all', // all, dikirim, selesai, menunggu
+             showTrackModal: false,
+             showReviewModal: false,
+             selectedOrder: null,
+             rating: 0,
+             
+             // PERBAIKAN: Menggunakan data transaksi dari PHP Controller
+             orders: {{ 
+                 $transactions->map(function($t) {
+                     // Format data agar sesuai dengan struktur Alpine.js (orders)
+                     $firstDetail = $t->details->first();
+                     $itemsDesc = '';
+                     if ($firstDetail) {
+                         $itemsDesc = 'Size: ' . $firstDetail->size . 
+                                      ($firstDetail->outfit_id ? ' + Baju' : '') . 
+                                      ($firstDetail->accessory_id ? ' + Aksesoris' : '');
+                     }
 
-            confirmReceive(orderId) {
-                if(confirm('Apakah Anda yakin pesanan sudah diterima dengan baik?')) {
-                    // Update status dummy ke 'selesai'
-                    let order = this.orders.find(o => o.id === orderId);
-                    if(order) order.status = 'selesai';
-                    alert('Pesanan selesai! Silakan beri nilai.');
-                }
-            },
+                     return [
+                         'id' => $t->invoice_code, 
+                         'date' => \Carbon\Carbon::parse($t->created_at)->format('d M Y'), 
+                         'total' => $t->total_price, 
+                         'status' => $t->status, // pending, shipped, completed
+                         'resi' => $t->resi_number ?? 'Belum ada',
+                         'items' => [
+                             [
+                                 'name' => ucfirst($firstDetail->base_model ?? 'Produk') . ' Bear', 
+                                 'desc' => $itemsDesc
+                             ]
+                         ],
+                     ];
+                 })->toJson() 
+             }},
 
-            submitReview() {
-                alert('Terima kasih atas penilaian Anda! ⭐' + this.rating);
-                this.showReviewModal = false;
-                // Logic backend: Simpan review ke DB
-            }
-         }">
+             confirmReceive(orderId) {
+                 if(confirm('Apakah Anda yakin pesanan sudah diterima dengan baik?')) {
+                     // Logika backend untuk mengubah status (ASUMSI: Anda menggunakan AJAX/Fetch)
+                     // alert('Aksi berhasil, status pesanan perlu diupdate via backend.');
+                 }
+             },
 
-        <!-- Header & Filter Status -->
+             submitReview() {
+                 alert('Terima kasih atas penilaian Anda! ⭐' + this.rating);
+                 this.showReviewModal = false;
+                 // Logic backend: Simpan review ke DB
+             }
+           }">
+
         <div class="flex flex-col md:flex-row justify-between items-center mb-8 gap-4">
             <h1 class="text-3xl font-extrabold text-gray-800">Pesanan Saya 📦</h1>
             <div class="flex bg-white p-1 rounded-xl shadow-sm border border-gray-200">
                 <button @click="activeTab = 'all'" :class="activeTab === 'all' ? 'bg-orange-100 text-orange-700' : 'text-gray-500 hover:bg-gray-50'" class="px-4 py-2 rounded-lg text-sm font-bold transition">Semua</button>
-                <button @click="activeTab = 'dikirim'" :class="activeTab === 'dikirim' ? 'bg-orange-100 text-orange-700' : 'text-gray-500 hover:bg-gray-50'" class="px-4 py-2 rounded-lg text-sm font-bold transition">Dikirim</button>
-                <button @click="activeTab = 'selesai'" :class="activeTab === 'selesai' ? 'bg-orange-100 text-orange-700' : 'text-gray-500 hover:bg-gray-50'" class="px-4 py-2 rounded-lg text-sm font-bold transition">Selesai</button>
+                <button @click="activeTab = 'pending'" :class="activeTab === 'pending' ? 'bg-orange-100 text-orange-700' : 'text-gray-500 hover:bg-gray-50'" class="px-4 py-2 rounded-lg text-sm font-bold transition">Menunggu</button>
+                <button @click="activeTab = 'shipped'" :class="activeTab === 'shipped' ? 'bg-orange-100 text-orange-700' : 'text-gray-500 hover:bg-gray-50'" class="px-4 py-2 rounded-lg text-sm font-bold transition">Dikirim</button>
+                <button @click="activeTab = 'completed'" :class="activeTab === 'completed' ? 'bg-orange-100 text-orange-700' : 'text-gray-500 hover:bg-gray-50'" class="px-4 py-2 rounded-lg text-sm font-bold transition">Selesai</button>
             </div>
         </div>
 
-        <!-- LIST PESANAN -->
         <div class="space-y-6">
             <template x-for="order in orders" :key="order.id">
                 <div x-show="activeTab === 'all' || activeTab === order.status" class="bg-white rounded-3xl p-6 shadow-sm border border-gray-100 hover:shadow-md transition">
                     
-                    <!-- Header Kartu -->
                     <div class="flex justify-between items-start border-b border-gray-100 pb-4 mb-4">
                         <div>
                             <p class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-1" x-text="order.date"></p>
                             <p class="font-bold text-gray-800" x-text="'Order #' + order.id"></p>
                         </div>
                         
-                        <!-- Status Badge -->
                         <div>
-                            <span x-show="order.status === 'dikirim'" class="bg-blue-100 text-blue-700 px-3 py-1 rounded-full text-xs font-bold flex items-center gap-1">
+                            <span x-show="order.status === 'shipped'" class="bg-blue-100 text-blue-700 px-3 py-1 rounded-full text-xs font-bold flex items-center gap-1">
                                 🚚 Sedang Dikirim
                             </span>
-                            <span x-show="order.status === 'selesai'" class="bg-green-100 text-green-700 px-3 py-1 rounded-full text-xs font-bold flex items-center gap-1">
+                            <span x-show="order.status === 'completed'" class="bg-green-100 text-green-700 px-3 py-1 rounded-full text-xs font-bold flex items-center gap-1">
                                 ✅ Pesanan Selesai
+                            </span>
+                            <span x-show="order.status === 'pending'" class="bg-yellow-100 text-yellow-700 px-3 py-1 rounded-full text-xs font-bold flex items-center gap-1">
+                                ⏳ Menunggu Pembayaran
                             </span>
                         </div>
                     </div>
 
-                    <!-- Item Detail -->
                     <div class="flex items-center gap-4 mb-6">
                         <div class="w-16 h-16 bg-orange-50 rounded-xl flex items-center justify-center text-3xl">🧸</div>
                         <div class="flex-1">
@@ -105,25 +126,21 @@
                         </div>
                         <div class="text-right">
                             <p class="text-sm text-gray-400">Total Belanja</p>
-                            <p class="font-extrabold text-orange-600" x-text="'Rp ' + order.total.toLocaleString('id-ID')"></p>
+                            <p class="font-extrabold text-orange-600" x-text="formatRupiah(order.total)"></p>
                         </div>
                     </div>
 
-                    <!-- Action Buttons -->
                     <div class="flex justify-end gap-3 pt-4 border-t border-gray-50">
                         
-                        <!-- Tombol Lacak (Muncul kalau dikirim/selesai) -->
-                        <button @click="selectedOrder = order; showTrackModal = true" class="px-4 py-2 bg-gray-100 text-gray-600 rounded-xl text-sm font-bold hover:bg-gray-200 transition">
+                        <button x-show="order.status === 'shipped' || order.status === 'completed'" @click="selectedOrder = order; showTrackModal = true" class="px-4 py-2 bg-gray-100 text-gray-600 rounded-xl text-sm font-bold hover:bg-gray-200 transition">
                             📍 Lacak Paket
                         </button>
 
-                        <!-- Tombol Terima (Hanya kalau status dikirim) -->
-                        <button x-show="order.status === 'dikirim'" @click="confirmReceive(order.id)" class="px-6 py-2 bg-orange-600 text-white rounded-xl text-sm font-bold hover:bg-orange-700 shadow-lg shadow-orange-500/30 transition transform hover:-translate-y-0.5">
+                        <button x-show="order.status === 'shipped'" @click="confirmReceive(order.id)" class="px-6 py-2 bg-orange-600 text-white rounded-xl text-sm font-bold hover:bg-orange-700 shadow-lg shadow-orange-500/30 transition transform hover:-translate-y-0.5">
                             Pesanan Diterima
                         </button>
 
-                        <!-- Tombol Review (Hanya kalau selesai) -->
-                        <button x-show="order.status === 'selesai'" @click="selectedOrder = order; showReviewModal = true" class="px-6 py-2 border-2 border-orange-500 text-orange-600 rounded-xl text-sm font-bold hover:bg-orange-50 transition">
+                        <button x-show="order.status === 'completed'" @click="selectedOrder = order; showReviewModal = true" class="px-6 py-2 border-2 border-orange-500 text-orange-600 rounded-xl text-sm font-bold hover:bg-orange-50 transition">
                             ⭐ Beri Nilai
                         </button>
                     </div>
@@ -131,8 +148,7 @@
                 </div>
             </template>
         </div>
-
-        <!-- MODAL 1: LACAK PAKET -->
+        
         <div x-show="showTrackModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm" x-cloak x-transition>
             <div @click.away="showTrackModal = false" class="bg-white rounded-[2rem] w-full max-w-md p-6 shadow-2xl relative">
                 <button @click="showTrackModal = false" class="absolute top-4 right-4 text-gray-400 hover:text-gray-600">✕</button>
@@ -140,11 +156,9 @@
                 <h3 class="text-xl font-extrabold text-gray-800 mb-2">Status Pengiriman</h3>
                 <p class="text-sm text-gray-500 mb-6">Resi: <span class="font-mono font-bold text-orange-600" x-text="selectedOrder?.resi"></span></p>
 
-                <!-- Timeline -->
                 <div class="relative space-y-6 pl-2">
                     <div class="timeline-line"></div>
                     
-                    <!-- Step 1 -->
                     <div class="relative flex gap-4">
                         <div class="w-8 h-8 rounded-full bg-green-500 text-white flex items-center justify-center z-10 text-xs shadow">✓</div>
                         <div>
@@ -152,7 +166,6 @@
                             <p class="text-xs text-gray-500">Malang Gateway • 09:30 WIB</p>
                         </div>
                     </div>
-                    <!-- Step 2 -->
                     <div class="relative flex gap-4">
                         <div class="w-8 h-8 rounded-full bg-green-500 text-white flex items-center justify-center z-10 text-xs shadow">✓</div>
                         <div>
@@ -160,7 +173,6 @@
                             <p class="text-xs text-gray-500">Transit Surabaya • 14:00 WIB</p>
                         </div>
                     </div>
-                    <!-- Step 3 (Aktif) -->
                     <div class="relative flex gap-4">
                         <div class="w-8 h-8 rounded-full bg-orange-500 text-white flex items-center justify-center z-10 text-xs shadow animate-pulse">🚚</div>
                         <div>
@@ -172,14 +184,12 @@
             </div>
         </div>
 
-        <!-- MODAL 2: BERI ULASAN -->
         <div x-show="showReviewModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm" x-cloak x-transition>
             <div @click.away="showReviewModal = false" class="bg-white rounded-[2rem] w-full max-w-md p-8 shadow-2xl relative text-center">
                 
                 <h3 class="text-2xl font-extrabold text-gray-800 mb-2">Bagaimana Produknya?</h3>
                 <p class="text-gray-500 text-sm mb-6">Beri bintang untuk pesanan <span x-text="'#' + selectedOrder?.id" class="font-bold"></span></p>
 
-                <!-- Bintang Rating -->
                 <div class="flex justify-center gap-2 mb-6">
                     <template x-for="i in 5">
                         <button @click="rating = i" class="text-4xl transition transform hover:scale-110 focus:outline-none" :class="i <= rating ? 'text-yellow-400' : 'text-gray-200'">★</button>

@@ -4,25 +4,80 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Cart;
-use App\Models\Product; // Pastikan model Product ada
+use App\Models\Product;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 
 class CartController extends Controller
 {
+    // --- Data Konstan ini HARUS SAMA PERSIS dengan array 'items' di builder.blade.php ---
+    private function getHardcodedPrices()
+    {
+        return [
+            'bodies' => [
+                'coklat' => 150000, 'krem' => 150000, 'polar' => 155000, 'panda' => 160000, 
+                'pink' => 150000, 'deer' => 175000, 'kitty' => 200000, 'bluey' => 180000, 
+                'bunny' => 165000, 'cinamon' => 185000
+            ],
+            'outfits' => [
+                'none' => 0, 'tuxedo' => 95000, 'kaos' => 50000, 'hoodie' => 75000, 
+                'dress' => 65000, 'piyama' => 55000, 'denim' => 85000, 'polisi' => 80000, 
+                'dokter' => 75000, 'astronaut' => 120000
+            ],
+            'accessories' => [
+                'none' => 0, 'kacamata' => 25000, 'topi' => 35000, 'pita' => 15000, 
+                'mahkota' => 45000, 'earmuff' => 40000, 'tas' => 30000, 'syal' => 20000, 
+                'bunga' => 15000, 'masker' => 10000
+            ],
+            'voices' => [
+                'none' => 0, 'love' => 30000, 'bday' => 30000, 'laugh' => 25000, 'lullaby' => 35000, 
+                'congrats' => 30000, 'gws' => 30000, 'morning' => 25000, 'animal' => 25000, 'sorry' => 30000,
+                'record' => 75000 // Harga Rekam Sendiri
+            ],
+            'scents' => [
+                'none' => 0, 'vanilla' => 15000, 'strawberry' => 15000, 'chocolate' => 15000, 
+                'bubblegum' => 20000, 'lavender' => 20000, 'coffee' => 15000, 'rose' => 20000, 
+                'lemon' => 15000, 'baby' => 20000
+            ],
+            'gifts' => [
+                'none' => 0, 'premium' => 25000, 'birthday' => 30000, 'love' => 35000, 
+                'christmas' => 35000, 'lebaran' => 30000, 'graduation' => 30000, 'mystery' => 50000, 
+                'transparent' => 60000, 'basket' => 45000
+            ]
+        ];
+    }
+    
+    // Helper function untuk mendapatkan harga item berdasarkan ID
+    private function getItemPrice($id, $category)
+    {
+        $prices = $this->getHardcodedPrices();
+        if ($id === null || $id === 'none') return 0;
+        return $prices[$category][$id] ?? 0;
+    }
+
+
+    /**
+     * Menampilkan halaman Workshop dan Meneruskan Hitungan Keranjang.
+     */
+    public function showWorkshop()
+    {
+        $cartCount = Auth::check() ? Cart::where('user_id', Auth::id())->count() : 0;
+        return view('builder', compact('cartCount'));
+    }
+    
     /**
      * Menampilkan isi keranjang (Halaman Wardrobe)
      */
     public function index()
     {
         // Ambil data keranjang milik user yang sedang login
-        // Diurutkan dari yang terbaru
         $carts = Cart::where('user_id', Auth::id())
                      ->orderBy('created_at', 'desc')
                      ->get();
         
-        // Kirim data ke view 'wardrobe'
-        return view('wardrobe', compact('carts'));
+        // Meneruskan cartCount ke view 'wardrobe'
+        $cartCount = $carts->count();
+        return view('wardrobe', compact('carts', 'cartCount'));
     }
 
     /**
@@ -32,119 +87,132 @@ class CartController extends Controller
     {
         // 1. Validasi Input
         $request->validate([
-            'base' => 'required',
-            'size' => 'required',
-            'action_type' => 'required', // 'buy' atau 'cart'
+            'base' => 'required|string',
+            'size' => 'required|string',
+            'action_type' => 'required|string',
         ]);
 
-        // 2. Hitung Harga di Backend (Security Best Practice)
-        // Kita hitung ulang di sini biar user gak bisa manipulasi harga via Inspect Element
-        $totalPrice = 0;
-
-        // Harga Base Body (Boneka)
-        $pricesBase = ['S' => 100000, 'M' => 150000, 'L' => 250000];
-        $totalPrice += $pricesBase[$request->size] ?? 0;
-
-        // Harga Outfit (Contoh Logic: Cek ID barang, atau hardcode sesuai kesepakatan)
-        // Idealnya: $product = Product::find($request->outfit); $totalPrice += $product->price;
-        // Simulasi sesuai Frontend:
-        if ($request->outfit && $request->outfit != 'none') {
-            $totalPrice += match($request->outfit) {
-                'kaos' => 50000,
-                'hoodie' => 75000,
-                'dress' => 65000,
-                default => 0
-            };
+        // 2. Hitung Harga Total (SINKRONISASI HARGA)
+        
+        // a. Base Price + Size Adjustment
+        $basePrice = $this->getItemPrice($request->base, 'bodies');
+        
+        if ($request->size === 'S') {
+            $basePrice -= 20000;
+        } elseif ($request->size === 'XL') {
+            $basePrice += 50000;
         }
+        
+        $totalPrice = $basePrice;
 
-        // Harga Aksesoris
-        if ($request->accessory && $request->accessory != 'none') {
-            $totalPrice += match($request->accessory) {
-                'kacamata' => 25000,
-                'topi' => 35000,
-                'pita' => 15000,
-                default => 0
-            };
-        }
+        // b. Item Kustomisasi lainnya
+        $totalPrice += $this->getItemPrice($request->outfit, 'outfits');
+        $totalPrice += $this->getItemPrice($request->accessory, 'accessories');
+        
+        // c. Harga Fitur Suara (Termasuk 'record')
+        $totalPrice += $this->getItemPrice($request->voice, 'voices');
 
-        // Harga Fitur Suara
-        if ($request->voice) {
-            if ($request->voice == 'record') $totalPrice += 75000;
-            elseif ($request->voice != 'none') $totalPrice += 30000;
-        }
+        // d. Harga Wangi
+        $totalPrice += $this->getItemPrice($request->scent, 'scents');
 
-        // Harga Wangi
-        if ($request->scent && $request->scent != 'none') {
-            $totalPrice += ($request->scent == 'bubblegum' || $request->scent == 'lavender') ? 20000 : 15000;
-        }
-
-        // Harga Gift Box
-        if ($request->gift_box) {
-            if ($request->gift_box == 'premium') $totalPrice += 25000;
-            elseif ($request->gift_box == 'birthday') $totalPrice += 30000;
-        }
+        // e. Harga Gift Box
+        $totalPrice += $this->getItemPrice($request->gift_box, 'gifts');
 
 
         // 3. Handle Upload Rekaman Suara (Blob)
         $voicePath = null;
-        if ($request->hasFile('audio_blob')) {
+        if ($request->voice == 'record' && $request->hasFile('audio_blob')) {
             $file = $request->file('audio_blob');
-            // Nama file unik: voice_USERID_TIMESTAMP.webm
             $filename = 'voice_' . Auth::id() . '_' . time() . '.webm';
             
-            // Simpan ke folder: storage/app/public/voices
-            // Pastikan sudah jalanin: php artisan storage:link
-            $path = $file->storeAs('voices', $filename, 'public');
-            $voicePath = $path;
+            try {
+                $path = $file->storeAs('voices', $filename, 'public');
+                $voicePath = $path;
+            } catch (\Exception $e) {
+                if ($request->ajax()) {
+                    return response()->json(['success' => false, 'message' => 'Gagal menyimpan file rekaman suara.'], 500);
+                }
+                return back()->with('error', 'Gagal menyimpan file rekaman suara. Coba lagi.')->withInput();
+            }
         }
 
 
         // 4. Simpan Data ke Tabel Carts
         $cart = Cart::create([
-            'user_id'       => Auth::id(), // Pastikan user sudah login
+            'user_id'       => Auth::id(),
             'base_model'    => $request->base,
             'size'          => $request->size,
             'outfit_id'     => $request->outfit == 'none' ? null : $request->outfit,
             'accessory_id'  => $request->accessory == 'none' ? null : $request->accessory,
             
-            // Fitur Custom
             'voice_type'    => $request->voice,
             'voice_file'    => $voicePath,
             'scent_type'    => $request->scent,
             'gift_box'      => $request->gift_box,
             'card_message'  => $request->card_message,
-            'is_dressed'    => $request->dress_bear === 'true', // Konversi string 'true' ke boolean
+            'is_dressed'    => $request->dress_bear === 'true',
             
-            'total_price'   => $totalPrice,
+            'total_price'   => $totalPrice, 
         ]);
 
-        // 5. Redirect Sesuai Tombol yang Ditekan
+        // 5. Redirect Sesuai Tombol yang Ditekan (AJAX / Non-AJAX)
+        $cartCount = Cart::where('user_id', Auth::id())->count();
+
         if ($request->action_type == 'buy') {
-            // Jika Beli Sekarang, arahkan ke Checkout
-            // Opsional: Kirim ID cart yang baru dibuat biar di checkout langsung kepilih
             return redirect()->route('checkout')->with('direct_checkout_id', $cart->id);
-        } else {
-            // Jika Masuk Keranjang, arahkan ke Wardrobe dengan pesan sukses
-            return redirect()->route('wardrobe')->with('success', 'Boneka berhasil masuk keranjang!');
+        } 
+        
+        if ($request->ajax() && $request->action_type == 'cart') {
+             return response()->json([
+                 'success' => true,
+                 'cart_count' => $cartCount,
+                 'message' => 'Item berhasil ditambahkan ke keranjang!'
+             ]);
         }
+
+        return redirect()->route('wardrobe')->with('success', 'Boneka berhasil ditambahkan ke keranjang!');
     }
     
     /**
-     * Menghapus Item dari Keranjang
+     * Menghapus Item dari Keranjang (Tunggal)
      */
     public function destroy($id)
     {
         $cart = Cart::where('user_id', Auth::id())->where('id', $id)->first();
         
         if ($cart) {
-            $cart->delete();
-            // Hapus file rekaman jika ada, biar hemat storage
             if ($cart->voice_file && Storage::disk('public')->exists($cart->voice_file)) {
                 Storage::disk('public')->delete($cart->voice_file);
             }
-            return back()->with('success', 'Item dihapus.');
+            $cart->delete();
+            return back()->with('success', 'Item berhasil dihapus dari keranjang.');
         }
         
-        return back()->with('error', 'Item tidak ditemukan.');
+        return back()->with('error', 'Item keranjang tidak ditemukan.');
+    }
+    
+    /**
+     * Menghapus Item dari Keranjang (Massal/Bulk)
+     */
+    public function bulkDestroy(Request $request)
+    {
+        $ids = $request->input('selected_ids'); 
+        
+        if (!empty($ids) && is_array($ids)) {
+            $cartsToDelete = Cart::where('user_id', Auth::id())->whereIn('id', $ids)->get();
+            $deletedCount = 0;
+            
+            foreach ($cartsToDelete as $cart) {
+                if ($cart->voice_file && Storage::disk('public')->exists($cart->voice_file)) {
+                    Storage::disk('public')->delete($cart->voice_file);
+                }
+                $cart->delete();
+                $deletedCount++;
+            }
+            
+            return back()->with('success', $deletedCount . ' item berhasil dihapus dari keranjang.');
+        }
+        
+        return back()->with('error', 'Tidak ada item yang dipilih untuk dihapus.');
     }
 }
