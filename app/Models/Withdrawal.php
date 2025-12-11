@@ -2,22 +2,23 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class Withdrawal extends Model
 {
+    use HasFactory;
 
     protected $fillable = [
-        'store_balance_id',
+        'store_id',
         'amount',
-        'bank_account_name',
-        'bank_account_number',
         'bank_name',
-        'status',
+        'account_number',
+        'status', // pending, approved, rejected
     ];
 
-    public function storeBalance()
+    public function store()
     {
-        return $this->belongsTo(StoreBalance::class);
+        return $this->belongsTo(Store::class);
     }
 }

@@ -15,7 +15,7 @@ use Illuminate\View\View;
 class RegisteredUserController extends Controller
 {
     /**
-     * Display the registration view.
+     * Tampilkan halaman daftar.
      */
     public function create(): View
     {
@@ -23,9 +23,7 @@ class RegisteredUserController extends Controller
     }
 
     /**
-     * Handle an incoming registration request.
-     *
-     * @throws \Illuminate\Validation\ValidationException
+     * Proses pendaftaran user baru.
      */
     public function store(Request $request): RedirectResponse
     {
@@ -39,12 +37,14 @@ class RegisteredUserController extends Controller
             'name' => $request->name,
             'email' => $request->email,
             'password' => Hash::make($request->password),
+            'role' => 'member', // Default jadi member biasa
         ]);
 
         event(new Registered($user));
 
         Auth::login($user);
 
+        // [FIX] ALUR BENAR: Setelah daftar, langsung masuk Dashboard
         return redirect(route('dashboard', absolute: false));
     }
 }

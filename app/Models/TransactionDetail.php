@@ -2,26 +2,22 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class TransactionDetail extends Model
 {
+    use HasFactory;
 
     protected $fillable = [
         'transaction_id',
         'product_id',
-        'qty',
-        'subtotal',
+        'voice_message',    // URL file rekaman atau kode suara
+        'scent',            // vanilla, chocolate
+        'gift_box',         // premium, birthday
+        'is_dressed',       // true/false
+        'price'             // Harga saat beli
     ];
-
-    protected $casts = [
-        'subtotal' => 'decimal:2',
-    ];
-
-    public function transaction()
-    {
-        return $this->belongsTo(Transaction::class);
-    }
 
     public function product()
     {
