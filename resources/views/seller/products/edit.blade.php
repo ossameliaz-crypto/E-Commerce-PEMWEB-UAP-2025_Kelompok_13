@@ -5,7 +5,6 @@
         </h2>
     </x-slot>
 
-    {{-- PERBAIKAN 1: Mengubah latar belakang halaman dari bg-gray-50/50 menjadi bg-orange-50/50 --}}
     <div class="py-12 bg-orange-50/50 min-h-screen">
         <div class="max-w-4xl mx-auto sm:px-6 lg:px-8">
             
@@ -117,7 +116,6 @@
                         </div>
                     </div>
                     
-                    {{-- PERBAIKAN 2: Mengubah latar belakang kotak Gambar dari bg-gray-50 menjadi bg-orange-50 --}}
                     <div class="mb-8 p-4 border border-gray-200 rounded-xl bg-orange-50">
                         <p class="text-sm font-medium text-gray-700 mb-3">Gambar Saat Ini:</p>
                         @if($product->image)

@@ -8,8 +8,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Redirect;
 use Illuminate\View\View;
-use Illuminate\Support\Facades\File; // Tambahkan ini untuk File/Path lokal
-use Illuminate\Validation\Rule; // Ditambahkan untuk validasi email/Rule
+use Illuminate\Support\Facades\File; 
+use Illuminate\Validation\Rule; 
 
 class ProfileController extends Controller
 {
@@ -28,7 +28,6 @@ class ProfileController extends Controller
      */
     public function update(ProfileUpdateRequest $request): RedirectResponse
     {
-        // $request->validated() sekarang sudah mencakup phone_number (Asumsi ProfileUpdateRequest diperbaiki)
         $request->user()->fill($request->validated());
 
         if ($request->user()->isDirty('email')) {
@@ -74,12 +73,6 @@ class ProfileController extends Controller
             // 4. Simpan path relatif baru ke database
             $user->profile_picture = 'profile-images/' . $imageName;
             
-            // 🚀 PERBAIKAN BUG SQLSTATE [image_d7f35a.png]:
-            // Masalah di gambar 'd7f35a.png' adalah Controller/Code lama 
-            // mencoba menyimpan ke kolom 'profile_image_path', yang tidak ada.
-            // Kolom yang benar di DB Anda adalah 'profile_picture'.
-            // Kode di atas SUDAH BENAR menggunakan $user->profile_picture = ...
-            
             $user->save();
         }
 
@@ -97,7 +90,6 @@ class ProfileController extends Controller
 
         $user = $request->user();
 
-        // 🚨 Hapus gambar profil dari storage sebelum hapus user
         if ($user->profile_picture) {
             $imagePath = public_path($user->profile_picture);
             if (File::exists($imagePath)) {

@@ -19,7 +19,6 @@ class ProfileUpdateRequest extends FormRequest
             'name' => ['string', 'max:255'],
             'email' => ['email', 'max:255', Rule::unique(User::class)->ignore($this->user()->id)],
             
-            // 🚀 PERBAIKAN KRUSIAL: Tambahkan aturan validasi untuk phone_number
             'phone_number' => ['nullable', 'string', 'max:15'], 
         ];
     }

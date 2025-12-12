@@ -24,7 +24,6 @@
             }
         }
         
-        // **INIT GLOBAL ALPINE STORE FOR MODAL**
         document.addEventListener('alpine:init', () => {
             Alpine.store('wardrobeModal', {
                 isModalOpen: false,
@@ -40,7 +39,6 @@
             });
         });
         
-        // Memastikan formatRupiah ada secara global untuk digunakan di modal
         window.formatRupiah = (angka) => {
             return 'Rp ' + Number(angka).toLocaleString('id-ID');
         };
@@ -71,7 +69,6 @@
                 'id' => $item->id,
                 'name' => ucfirst($item->base_model) . ' Bear',
                 'size' => $item->size,
-                // Pastikan harga di-cast ke numerik
                 'price' => (int) $item->total_price, 
                 'type' => $typeDesc,
                 'image' => $icon,
@@ -178,7 +175,6 @@
                         .reduce((sum, item) => sum + (Number(item.price) || 0), 0);
                 },
 
-                // Menghapus logic Voucher/Diskon karena fiturnya dihapus
                 
                 toggleSelectAll() {
                     if (this.selectedItems.length === this.cartItems.length) {
@@ -188,7 +184,6 @@
                     }
                 },
 
-                // === FUNGSI HAPUS ITEM TUNGGAL ===
                 deleteItem(itemId) {
                     if (window.confirm('Yakin ingin menghapus item ini dari keranjang? Tindakan ini tidak bisa dibatalkan.')) {
                         const form = document.getElementById(`delete-form-${itemId}`);
@@ -197,7 +192,6 @@
                     }
                 },
 
-                // === FUNGSI LIHAT DETAIL ITEM KERANJANG ===
                 openItemDetail(item) {
                     Alpine.store('wardrobeModal').openDetail(item);
                 },
@@ -207,8 +201,7 @@
                 }
             }"
             x-init="
-                // Watcher diskon tidak diperlukan lagi
-                // Panggil calculateDiscount tidak diperlukan lagi
+               
             "
             >
 

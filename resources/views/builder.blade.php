@@ -152,7 +152,6 @@
                     return basePrice;
                 },
 
-                // === DATABASE ITEMS (HARUS SINKRON DENGAN CONTROLLER) ===
                 items: {
                     bodies: [
                         { id: 'coklat', name: 'Choco Bear', price: 150000, desc: 'Beruang coklat klasik yang lembut.', image: `{{ asset('picture/bonekaCoklat.png') }}` },

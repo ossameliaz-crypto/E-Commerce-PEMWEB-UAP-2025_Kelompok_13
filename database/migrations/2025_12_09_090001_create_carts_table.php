@@ -10,7 +10,6 @@ return new class extends Migration
     {
         Schema::create('carts', function (Blueprint $table) {
             $table->id();
-            // Siapa yang beli?
             $table->foreignId('user_id')->constrained()->onDelete('cascade');
             
             // Detail Custom Boneka

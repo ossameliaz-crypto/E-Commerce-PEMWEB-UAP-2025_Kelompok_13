@@ -186,7 +186,6 @@
 
     </div>
 
-    <!-- SCRIPT LOGIC -->
     <script>
         document.addEventListener('alpine:init', () => {
             Alpine.data('storeManager', () => ({
@@ -194,16 +193,14 @@
                 filterStatus: 'all',
                 selectedStore: null,
                 
-                // DATA DUMMY (NAMA TOKO PROFESIONAL)
                 stores: [
-                    { id: 1, name: 'Teddy House Official', owner: 'Rina Nose', email: 'rina@teddyhouse.com', location: 'Malang, ID', balance: 1200000, status: 'verified', icon: '🧸', bg: 'bg-orange-100' },
-                    { id: 2, name: 'Cuddle Corner', owner: 'Joko Anwar', email: 'joko@cuddle.co.id', location: 'Surabaya, ID', balance: 450000, status: 'verified', icon: '🧶', bg: 'bg-blue-100' },
-                    { id: 3, name: 'Kids Station Bandung', owner: 'Budi Santoso', email: 'budi@kidsstation.com', location: 'Bandung, ID', balance: 0, status: 'suspended', icon: '🚫', bg: 'bg-red-100' },
-                    { id: 4, name: 'Doll Fashionista', owner: 'Siti Badriah', email: 'siti@fashion.com', location: 'Jakarta, ID', balance: 8500000, status: 'verified', icon: '👗', bg: 'bg-pink-100' },
-                    { id: 5, name: 'Accessories Kingdom', owner: 'Raffi Ahmad', email: 'raffi@kingdom.com', location: 'Medan, ID', balance: 250000, status: 'verified', icon: '👑', bg: 'bg-yellow-100' },
+                    { id: 1, name: 'Teddy House Official', owner: 'Wafi Javier', email: 'wafi@teddyhouse.com', location: 'Malang, ID', balance: 1200000, status: 'verified', icon: '🧸', bg: 'bg-orange-100' },
+                    { id: 2, name: 'Cuddle Corner', owner: 'Afillah Syayyid', email: 'afi@cuddle.co.id', location: 'Surabaya, ID', balance: 450000, status: 'verified', icon: '🧶', bg: 'bg-blue-100' },
+                    { id: 3, name: 'Kids Station Bandung', owner: 'Shelfina Khayla', email: 'khayla@kidsstation.com', location: 'Bandung, ID', balance: 0, status: 'suspended', icon: '🚫', bg: 'bg-red-100' },
+                    { id: 4, name: 'Doll Fashionista', owner: 'Anindita', email: 'anin@fashion.com', location: 'Jakarta, ID', balance: 8500000, status: 'verified', icon: '👗', bg: 'bg-pink-100' },
+                    { id: 5, name: 'Accessories Kingdom', owner: 'Zuhra Lubis', email: 'zuhra@kingdom.com', location: 'Medan, ID', balance: 250000, status: 'verified', icon: '👑', bg: 'bg-yellow-100' },
                 ],
 
-                // Filter Logic
                 get filteredStores() {
                     return this.stores.filter(store => {
                         const matchesSearch = store.name.toLowerCase().includes(this.search.toLowerCase()) || 
@@ -222,7 +219,6 @@
                 },
 
                 toggleStatus(store) {
-                    // Simulasi update status
                     store.status = store.status === 'verified' ? 'suspended' : 'verified';
                 },
 

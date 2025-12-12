@@ -6,15 +6,12 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     * Membuat tiga tabel standar: users, password_reset_tokens, dan sessions.
-     */
+    
     public function up(): void
     {
         // 1. Tabel users (Untuk Login/Register, Role, dan Profil E-Commerce)
         Schema::create('users', function (Blueprint $table) {
-            $table->id(); // Primary Key, Auto-increment
+            $table->id(); 
             
             $table->string('name');
             $table->string('email')->unique();
@@ -52,10 +49,7 @@ return new class extends Migration
         });
     }
 
-    /**
-     * Reverse the migrations.
-     * Perintah untuk menghapus tabel saat rollback/refresh.
-     */
+    
     public function down(): void
     {
         Schema::dropIfExists('sessions');

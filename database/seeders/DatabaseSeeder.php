@@ -5,12 +5,11 @@ namespace Database\Seeders;
 use App\Models\User;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
-use Illuminate\Support\Facades\Hash; // Tambahkan ini jika Anda mendefinisikan password
+use Illuminate\Support\Facades\Hash; 
 
 class DatabaseSeeder extends Seeder
 {
-    // Menggunakan WithoutModelEvents sudah benar jika tidak ingin memicu Event
-    // use WithoutModelEvents; 
+    
 
     /**
      * Seed the application's database.

@@ -138,7 +138,6 @@
                         </tbody>
                     </table>
                 </div>
-                <!-- Pagination Dummy -->
                 <div class="p-4 border-t border-gray-100 flex justify-between items-center text-xs text-gray-400">
                     <span x-text="'Menampilkan ' + filteredUsers.length + ' user'"></span>
                     <div class="flex gap-2">
@@ -191,7 +190,6 @@
 
     </div>
 
-    <!-- ALPINE.JS LOGIC -->
     <script>
         document.addEventListener('alpine:init', () => {
             Alpine.data('userManager', () => ({
@@ -199,7 +197,6 @@
                 isModalOpen: false,
                 editMode: false,
                 
-                // Data Dummy User Realistis
                 users: [
                     { id: 1, name: 'Admin Pusat', email: 'admin@buildateddy.com', role: 'admin', status: 'Active', initials: 'AP', avatarColor: 'bg-red-100 text-red-600', avatarBorder: 'border-red-200' },
                     { id: 2, name: 'Budi Santoso', email: 'budi.santoso@example.com', role: 'seller', status: 'Active', initials: 'BS', avatarColor: 'bg-blue-100 text-blue-600', avatarBorder: 'border-blue-200' },
@@ -230,7 +227,6 @@
 
                 editUser(user) {
                     this.editMode = true;
-                    // Clone object agar tidak reaktif langsung saat edit
                     this.form = { ...user };
                     this.isModalOpen = true;
                 },
@@ -241,14 +237,11 @@
 
                 saveUser() {
                     if (this.editMode) {
-                        // Update existing user
                         let index = this.users.findIndex(u => u.id === this.form.id);
                         if (index !== -1) {
-                            // Update visual properties based on name/role
                             let names = this.form.name.split(' ');
                             this.form.initials = names[0].charAt(0) + (names.length > 1 ? names[names.length - 1].charAt(0) : '');
                             
-                            // Set color based on role (simple logic)
                             if (this.form.role === 'admin') {
                                 this.form.avatarColor = 'bg-red-100 text-red-600';
                                 this.form.avatarBorder = 'border-red-200';
@@ -264,9 +257,7 @@
                             alert('Data user berhasil diperbarui!');
                         }
                     } else {
-                        // Add new user (Simulation)
                         let newUser = { ...this.form, id: Date.now() };
-                        // Generate initials & color for new user
                         let names = newUser.name.split(' ');
                         newUser.initials = (names[0]?.charAt(0) || 'U') + (names.length > 1 ? names[names.length - 1].charAt(0) : '');
                         newUser.avatarColor = 'bg-gray-100 text-gray-600';
@@ -281,7 +272,6 @@
                 deleteUser(id) {
                     if(confirm('Apakah Anda yakin ingin menghapus user ini?')) {
                         this.users = this.users.filter(user => user.id !== id);
-                        // Di real app, panggil fetch DELETE ke backend di sini
                     }
                 }
             }));

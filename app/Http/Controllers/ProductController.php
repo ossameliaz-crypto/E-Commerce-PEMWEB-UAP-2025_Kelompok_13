@@ -4,7 +4,6 @@ namespace App\Http\Controllers;
 
 use App\Http\Controllers\Controller; 
 use App\Models\Product; 
-// 💡 TAMBAHKAN MODEL ProductImage
 use App\Models\ProductImage; 
 use App\Models\Store; 
 use App\Models\ProductCategory; 
@@ -18,14 +17,12 @@ use Illuminate\Support\Facades\Log;
 
 class ProductController extends Controller
 {
-    // Konstruktor dan metode Index, Show, Create tidak perlu diubah.
     public function __construct()
     {
         $this->middleware('auth'); 
         $this->middleware('role:seller'); 
     }
     
-    // ... (metode index, show, create sudah benar, kode dihilangkan untuk fokus pada perbaikan CRUD) ...
 
     // --- Index (Menampilkan Daftar Produk) ---
     public function index()
@@ -68,7 +65,6 @@ class ProductController extends Controller
             return redirect()->route('store.register')->with('error', 'Toko tidak ditemukan.');
         }
 
-        // 💡 VALIDASI DIUBAH: Kolom 'image' Dihapus dari Product, tetapi file 'image' tetap di-validate
         $request->validate([
             'name' => 'required|string|max:255',
             'product_category_id' => 'required|exists:product_categories,id', 
@@ -77,7 +73,6 @@ class ProductController extends Controller
             'price' => 'required|numeric|min:1000', 
             'weight' => 'required|integer|min:1', 
             'stock' => 'required|integer|min:0',
-            // Gambar harus diisi untuk produk baru
             'image' => 'required|image|mimes:jpeg,png,jpg|max:2048', 
         ]);
         

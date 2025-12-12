@@ -61,10 +61,8 @@
 <body class="bg-orange-50/50 min-h-screen">
 
     @php
-        // Menggunakan nilai $cartTotal yang dihitung di TransactionController::checkout()
         $subtotalProducts = $cartTotal ?? 150000;
         
-        // Asumsi $carts sudah di-pass untuk Ringkasan Item
     @endphp
 
     <nav class="bg-white border-b border-orange-100 py-4 shadow-md sticky top-0 z-50">

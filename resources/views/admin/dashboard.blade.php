@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard Admin - Build-A-Teddy</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Alpine.js untuk interaksi tanpa refresh -->
     <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
     <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
     <style>
@@ -68,7 +67,6 @@
                 </div>
             </div>
 
-            <!-- STATISTIK (ANGKA DUMMY DINAMIS) -->
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
                 <!-- User Card -->
                 <div class="bg-white p-6 rounded-3xl shadow-sm border border-gray-100 hover:shadow-md transition group">
@@ -232,7 +230,6 @@
 
     </div>
 
-    <!-- LOGIC JAVASCRIPT (ALPINE.JS) -->
     <script>
         document.addEventListener('alpine:init', () => {
             Alpine.data('adminDashboard', () => ({
@@ -242,7 +239,6 @@
                 },
                 selectedStore: null,
                 
-                // DATA DUMMY (Bisa ditambah/dikurangi buat demo)
                 pendingStores: [
                     { id: 1, id_code: 'TR-8821', name: 'Teddy House Malang', owner: 'Budi Santoso', email: 'budi@gmail.com', phone: '0812-3456-7890', city: 'Malang', date: '04 Des 2025', desc: 'Menjual baju boneka rajut handmade kualitas premium.' },
                     { id: 2, id_code: 'TR-9901', name: 'Boneka Lucu Sby', owner: 'Siti Aminah', email: 'siti@yahoo.com', phone: '0857-1122-3344', city: 'Surabaya', date: '03 Des 2025', desc: 'Spesialis aksesoris kacamata dan topi untuk teddy bear.' },
@@ -257,7 +253,6 @@
                 // Fungsi Terima Toko
                 approveStore(id) {
                     if(confirm('Setujui toko ini? Mereka akan bisa mulai berjualan.')) {
-                        // Hapus dari list pending
                         this.pendingStores = this.pendingStores.filter(s => s.id !== id);
                         alert('Toko berhasil disetujui! Notifikasi dikirim ke seller.');
                     }

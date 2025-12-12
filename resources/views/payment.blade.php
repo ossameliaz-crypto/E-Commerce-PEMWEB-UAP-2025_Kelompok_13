@@ -53,7 +53,6 @@
              paymentMethod: 'va_bca', 
              category: 'transfer', 
              
-             // --- DATA MANIPULASI (Fixed Data) ---
              totalDue: 198000, 
              
              vaNumber: '', 
@@ -80,7 +79,6 @@
                  window.scrollTo({ top: 0, behavior: 'smooth' });
                  
                  setTimeout(() => {
-                     // Generate Data Dummy
                      if(this.paymentMethod.includes('bca')) this.vaNumber = '8806 0812 3456 7890';
                      else if(this.paymentMethod.includes('bri')) this.vaNumber = '1299 0812 3456 7890';
                      else if(this.paymentMethod.includes('mandiri')) this.vaNumber = '8900 0812 3456 7890';

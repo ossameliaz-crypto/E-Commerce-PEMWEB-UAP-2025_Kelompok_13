@@ -63,7 +63,6 @@
         </div>
 
         <div class="flex items-center gap-4">
-            {{-- 🚀 Tombol SAVE sudah menggunakan style besar (px-5 py-3 rounded-xl) --}}
             <button type="submit" class="inline-flex items-center px-5 py-3 bg-orange-600 border border-transparent rounded-xl font-bold text-white uppercase tracking-normal hover:bg-orange-700 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 transition ease-in-out duration-150">
                 {{ __('SAVE') }}
             </button>

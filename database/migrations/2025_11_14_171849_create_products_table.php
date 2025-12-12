@@ -12,7 +12,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('products', function (Blueprint $table) {
-            $table->id(); // Tidak perlu primary(), id() sudah otomatis primary
+            $table->id(); 
             $table->foreignId('store_id')->constrained('stores')->cascadeOnDelete();
             $table->foreignId('product_category_id')->constrained('product_categories')->cascadeOnDelete();
             $table->string('name');

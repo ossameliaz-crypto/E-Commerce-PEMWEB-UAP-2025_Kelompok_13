@@ -5,9 +5,8 @@
         </h2>
     </x-slot>
 
-    <!-- LOGIKA DATA DUMMY -->
     @php
-        $isNewUser = true; // Ubah ke false untuk tes tampilan user lama
+        $isNewUser = true;
         
         $saldo = $isNewUser ? 0 : 1500000;
         $pesanan_aktif = $isNewUser ? 0 : 1;

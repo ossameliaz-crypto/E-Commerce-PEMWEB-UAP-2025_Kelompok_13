@@ -12,7 +12,7 @@ return new class extends Migration
         Schema::create('transactions', function (Blueprint $table) {
             $table->id();
             $table->foreignId('user_id')->constrained()->onDelete('cascade');
-            $table->string('invoice_code')->unique(); // Contoh: TRX-998811
+            $table->string('invoice_code')->unique(); 
             
             // Info Pengiriman
             $table->string('recipient_name');
@@ -31,7 +31,6 @@ return new class extends Migration
             $table->id();
             $table->foreignId('transaction_id')->constrained('transactions')->onDelete('cascade');
             
-            // --- INI KOLOM YANG KITA TAMBAH BIAR LENGKAP ---
             $table->string('base_model');       // choco, panda, dll
             $table->string('size');             // S, M, XL
             $table->string('outfit_id')->nullable();     // Baju apa

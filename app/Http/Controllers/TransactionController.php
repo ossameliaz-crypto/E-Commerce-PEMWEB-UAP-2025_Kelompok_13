@@ -9,7 +9,7 @@ use App\Models\TransactionDetail;
 use App\Models\Product; 
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Js; // Tambahkan ini untuk helper JS
+use Illuminate\Support\Js;
 
 class TransactionController extends Controller
 {
@@ -59,7 +59,7 @@ class TransactionController extends Controller
             DB::beginTransaction();
 
             $transaction = Transaction::create([
-                'user_id' => Auth::id(), // Pastikan migration user_id sudah dijalankan
+                'user_id' => Auth::id(), 
                 'invoice_code' => 'TRX-' . time() . rand(100,999),
                 'status' => 'pending',
                 'total_price' => $grandTotal, 
@@ -113,10 +113,7 @@ class TransactionController extends Controller
         return view('payment');
     }
 
-    /**
-     * PERBAIKAN UTAMA DI SINI
-     * Kita format datanya di Controller supaya View bersih & tidak error
-     */
+    
     public function history()
     {
         $rawTransactions = Transaction::where('user_id', Auth::id())
@@ -151,7 +148,6 @@ class TransactionController extends Controller
             ];
         });
 
-        // Kirim $transactions yang sudah rapi ke view
         return view('history', compact('transactions'));
     }
 }

@@ -71,7 +71,6 @@
                 'id' => $item->id,
                 'name' => ucfirst($item->base_model) . ' Bear',
                 'size' => $item->size,
-                // Pastikan harga di-cast ke numerik
                 'price' => (int) $item->total_price, 
                 'type' => $typeDesc,
                 'image' => $icon,
@@ -172,13 +171,11 @@
                 selectedItems: [], 
                 
                 get totalSelected() {
-                    // FIX KRITIS: Memastikan nilai price dikonversi ke numerik
                     return this.cartItems
                         .filter(item => this.selectedItems.includes(item.id))
                         .reduce((sum, item) => sum + (Number(item.price) || 0), 0);
                 },
 
-                // Menghapus logic Voucher/Diskon karena fiturnya dihapus
                 
                 toggleSelectAll() {
                     if (this.selectedItems.length === this.cartItems.length) {
@@ -207,8 +204,7 @@
                 }
             }"
             x-init="
-                // Watcher diskon tidak diperlukan lagi
-                // Panggil calculateDiscount tidak diperlukan lagi
+                
             "
             >
 

@@ -26,7 +26,6 @@ class Product extends Model
         'stock',
     ];
 
-    // Casting untuk konversi tipe data otomatis
     protected $casts = [
         'price' => 'decimal:2',
         'stock' => 'integer',

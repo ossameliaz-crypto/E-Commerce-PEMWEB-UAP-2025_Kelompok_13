@@ -23,7 +23,7 @@ class ProductCategorySeeder extends Seeder
             DB::table('product_categories')->insert([
                 'name' => $category,
                 'slug' => Str::slug($category),
-                'tagline' => 'Kategori untuk ' . $category, // Diperlukan jika tagline NOT NULL
+                'tagline' => 'Kategori untuk ' . $category, 
                 'description' => 'Deskripsi default untuk kategori ' . $category, 
                 'created_at' => now(),
                 'updated_at' => now(),

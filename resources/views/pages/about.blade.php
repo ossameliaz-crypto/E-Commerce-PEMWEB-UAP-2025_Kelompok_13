@@ -10,20 +10,19 @@
         body { font-family: 'Nunito', sans-serif; background-color: #FFFBF5; }
         h1, h2, h3, .font-display { font-family: 'Fredoka', sans-serif; }
         
-        /* Definisi Warna Sesuai Konsep Brand (Oranye & Kuning) */
-        .color-yellow-bg { background-color: #FFECC5; /* Light Yellowish Cream */ }
-        .color-orange-bg { background-color: #FFEDD5; /* Orange-100 */ }
-        .color-darker-orange-bg { background-color: #FFD4AA; /* Slightly darker orange */ }
+        .color-yellow-bg { background-color: #FFECC5; }
+        .color-orange-bg { background-color: #FFEDD5; }
+        .color-darker-orange-bg { background-color: #FFD4AA;  }
 
         .vision-card {
             transition: all 0.3s ease-in-out;
             box-shadow: 0 10px 20px -5px rgba(0, 0, 0, 0.1);
-            border: 4px solid white; /* Border Putih Tebal */
+            border: 4px solid white;
         }
         .vision-card:hover {
             transform: scale(1.05) rotate(-0.5deg);
             box-shadow: 0 15px 30px -5px rgba(234, 88, 12, 0.35);
-            border-color: #FFEDD5; /* orange-100 */
+            border-color: #FFEDD5; 
         }
         .vision-card:hover .vision-icon {
             transform: scale(1.1);

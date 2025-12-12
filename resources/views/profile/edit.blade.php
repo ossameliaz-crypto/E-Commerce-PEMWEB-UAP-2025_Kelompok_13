@@ -1,7 +1,6 @@
 {{-- File: resources/views/profile/edit.blade.php (Pastikan struktur ini) --}}
 
 <x-app-layout>
-    {{-- 🛑 PERBAIKAN HEADER: Hapus dark:text-gray-200 jika ingin terang 🛑 --}}
     <x-slot name="header">
         <h2 class="font-semibold text-xl text-gray-800 leading-tight">
             {{ __('Profile') }}

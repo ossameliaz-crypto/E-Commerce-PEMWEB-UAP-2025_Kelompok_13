@@ -8,7 +8,6 @@
     <div class="py-12 bg-gray-50/50 min-h-screen">
         <div class="max-w-4xl mx-auto sm:px-6 lg:px-8">
             
-            {{-- 💡 Tambahkan display Session Status/Error Global di sini --}}
             @if (session('success'))
                 <div class="mb-4 p-4 rounded-xl bg-green-100 text-green-700 font-medium">
                     {{ session('success') }}
@@ -32,7 +31,6 @@
                     Formulir Produk Baru
                 </h3>
 
-                {{-- Route sudah pasti benar: seller.products.store --}}
                 <form action="{{ route('seller.products.store') }}" method="POST" enctype="multipart/form-data">
                     @csrf
 
@@ -128,7 +126,6 @@
                     
                     <div class="mb-8">
                         <label for="image" class="block text-sm font-medium text-gray-700 mb-2">Gambar Produk</label>
-                        {{-- 💡 PERBAIKAN: Hapus 'required' dari input file HTML, karena validasi file lebih baik di Controller --}}
                         <input type="file" id="image" name="image" accept="image/*"
                                  class="w-full file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-orange-50 file:text-orange-700 hover:file:bg-orange-100 cursor-pointer border-gray-300 rounded-xl shadow-sm @error('image') border-red-500 @enderror">
                         @error('image')
