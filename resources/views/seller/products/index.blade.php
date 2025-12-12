@@ -1,5 +1,3 @@
-{{-- File: resources/views/seller/products/index.blade.php --}}
-
 <!DOCTYPE html>
 <html lang="id">
 <head>
@@ -9,7 +7,7 @@
     {{-- Memuat Tailwind CSS dari CDN --}}
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
-    <style>body { font-family: 'Nunito', sans-serif; }</style>
+    <style>body {   font-family: 'Nunito', sans-serif; }</style>
 </head>
 <body class="bg-gray-50 min-h-screen font-sans">
 
@@ -24,11 +22,6 @@
                 {{-- Link Dashboard (Bukan aktif di halaman ini) --}}
                 <a href="{{ route('seller.dashboard') }}" class="flex items-center gap-3 px-4 py-3 text-gray-500 hover:bg-gray-50 hover:text-gray-900 font-bold rounded-xl transition">
                     <span>🏠</span> Dashboard
-                </a>
-                
-                {{-- Link Produk Saya (ACTIVE di halaman ini) --}}
-                <a href="{{ route('seller.products.index') }}" class="flex items-center gap-3 px-4 py-3 bg-orange-50 text-orange-700 font-bold rounded-xl transition">
-                    <span>📦</span> Produk 
                 </a>
                 <a href="{{ route('seller.orders') }}" class="flex items-center gap-3 px-4 py-3 text-gray-500 hover:bg-gray-50 hover:text-gray-900 font-bold rounded-xl transition">
                     <span>💰</span> Pesanan

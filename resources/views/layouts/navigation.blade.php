@@ -1,9 +1,8 @@
 <nav x-data="{ open: false }" class="bg-white border-b border-orange-100 sticky top-0 z-50">
-    <!-- Primary Navigation Menu -->
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="flex justify-between h-20">
             <div class="flex">
-                <!-- Logo -->
+                {{-- Logo --}}
                 <div class="shrink-0 flex items-center">
                     <a href="{{ route('home') }}" class="flex items-center gap-2 group">
                         <span class="text-3xl group-hover:animate-bounce transition">🧸</span>
@@ -14,25 +13,39 @@
                     </a>
                 </div>
 
-                <!-- Navigation Links (Menu Tengah) -->
-                <!-- [UBAH] Jarak margin kiri diperbesar (sm:ml-10 jadi sm:ml-24) biar logo gak mepet -->
+                {{-- ======================================================= --}}
+                {{-- NAVIGATION DESKTOP (sm:flex) --}}
+                {{-- ======================================================= --}}
                 <div class="hidden space-x-8 sm:-my-px sm:ml-24 sm:flex">
+                    
+                    {{-- 1. Dashboard --}}
                     <x-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')" class="text-gray-600 hover:text-orange-600 font-bold border-b-2 border-transparent hover:border-orange-500 transition">
-                        {{ __('Dashboard') }}
+                        🏠 {{ __('Dashboard') }}
                     </x-nav-link>
 
-                    <!-- LOGIKA MENU SESUAI ROLE (RBAC) -->
-                    
-                    <!-- 1. Menu Khusus Admin -->
+                    {{-- 2. Workshop --}}
+                    @if (Route::has('workshop'))
+                        <x-nav-link :href="route('workshop')" :active="request()->routeIs('workshop')" class="text-gray-600 hover:text-orange-600 font-bold border-b-2 border-transparent hover:border-orange-500 transition">
+                            🎨 Workshop
+                        </x-nav-link>
+                    @endif
+
+                    {{-- 3. Katalog (FIXED: Menggunakan route('collection') jika sudah terdaftar) --}}
+                    @if (Route::has('collection'))
+                        <x-nav-link :href="route('collection')" :active="request()->routeIs('collection')" class="text-gray-600 hover:text-orange-600 font-bold border-b-2 border-transparent hover:border-orange-500 transition">
+                            🎁 Katalog
+                        </x-nav-link>
+                    @endif
+
+                    {{-- Link Khusus Role --}}
                     @if(Auth::user()->role === 'admin')
                         <x-nav-link :href="route('admin.dashboard')" :active="request()->routeIs('admin.dashboard')" class="text-red-600 hover:text-red-800 font-bold">
                             🛡️ Admin Panel
                         </x-nav-link>
                     @endif
 
-                    <!-- 2. Menu Khusus Seller -->
                     @if(Auth::user()->role === 'seller')
-                        <x-nav-link :href="route('seller.dashboard')" :active="request()->routeIs('seller.dashboard')" class="text-green-600 hover:text-green-800 font-bold">
+                        <x-nav-link :href="route('seller.dashboard')" :active="request()->routeIs('seller.dashboard')" class="text-gray-600 hover:text-orange-600 font-bold">
                             🏪 Toko Saya
                         </x-nav-link>
                         <x-nav-link :href="route('seller.orders')" :active="request()->routeIs('seller.orders')" class="text-gray-600 hover:text-orange-600 font-bold">
@@ -40,24 +53,45 @@
                         </x-nav-link>
                     @endif
 
-                    <!-- 3. Menu Umum (Semua User) -->
-                    <x-nav-link :href="route('wardrobe')" :active="request()->routeIs('wardrobe')" class="text-gray-600 hover:text-orange-600 font-bold">
-                        🧥 Lemari Saya
-                    </x-nav-link>
+                    {{-- 4. Lemari Saya (FIXED KRUSIAL: Menggunakan route('cart.index') ) --}}
+                    @if (Route::has('cart.index'))
+                        <x-nav-link :href="route('cart.index')" :active="request()->routeIs('cart.index')" class="text-gray-600 hover:text-orange-600 font-bold">
+                            🧥 Lemari Saya
+                        </x-nav-link>
+                    @endif
                 </div>
             </div>
-
-            <!-- Settings Dropdown (Kanan) -->
+            
+            {{-- Bagian Dropdown User Profile (Tidak ada perubahan signifikan) --}}
             <div class="hidden sm:flex sm:items-center sm:ml-6">
                 
-                <!-- Widget Saldo DIHAPUS sesuai permintaan -->
-
                 <x-dropdown align="right" width="48">
                     <x-slot name="trigger">
-                        <button class="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-bold rounded-md text-gray-600 bg-white hover:text-orange-600 focus:outline-none transition ease-in-out duration-150">
-                            <div>{{ Auth::user()->name }}</div> <!-- Nama User -->
+                        {{-- 🌟 INTEGRASI AVATAR/INISIAL DI NAVBAR 🌟 --}}
+                        @php
+                            $user = Auth::user();
+                            $name = $user->name ?? 'User';
+                            $initial = strtoupper(substr($name, 0, 1)); 
+                            $imageUrl = $user->profile_picture ?? null; 
                             
-                            <!-- Badge Role (Label Kecil) -->
+                            $colorClasses = ['bg-red-500', 'bg-green-500', 'bg-blue-500', 'bg-yellow-500', 'bg-indigo-500', 'bg-pink-500', 'bg-purple-500'];
+                            $colorKey = ord($initial) % count($colorClasses);
+                            $color = $colorClasses[$colorKey];
+                        @endphp
+                        
+                        <button class="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-bold rounded-md text-gray-800 bg-white hover:text-orange-600 focus:outline-none transition ease-in-out duration-150">
+                            
+                            {{-- TAMPILKAN FOTO atau INISIAL --}}
+                            @if ($imageUrl)
+                                {{-- Menggunakan asset() untuk path gambar --}}
+                                <img src="{{ asset($imageUrl) }}" alt="{{ $name }}" class="h-8 w-8 rounded-full object-cover border me-2"> 
+                            @else
+                                <span class="h-8 w-8 rounded-full flex items-center justify-center text-sm font-semibold text-white {{ $color }} me-2">
+                                    {{ $initial }}
+                                </span>
+                            @endif
+                            
+                            <div>{{ Auth::user()->name }}</div> 
                             <span class="ml-2 text-[10px] px-2 py-0.5 rounded-full text-white {{ Auth::user()->role === 'admin' ? 'bg-red-500' : (Auth::user()->role === 'seller' ? 'bg-green-500' : 'bg-blue-400') }}">
                                 {{ ucfirst(Auth::user()->role) }}
                             </span>
@@ -71,19 +105,16 @@
                     </x-slot>
 
                     <x-slot name="content">
-                        <!-- Profile -->
                         <x-dropdown-link :href="route('profile.edit')">
                             {{ __('Profile') }}
                         </x-dropdown-link>
 
-                        <!-- Tombol Buka Toko (Hanya Muncul Jika Masih Member Biasa) -->
                         @if(Auth::user()->role === 'member')
                             <x-dropdown-link :href="route('store.register')" class="text-orange-600 font-bold border-t border-gray-100">
                                 🏪 Buka Toko Gratis
                             </x-dropdown-link>
                         @endif
 
-                        <!-- Logout -->
                         <form method="POST" action="{{ route('logout') }}">
                             @csrf
                             <x-dropdown-link :href="route('logout')"
@@ -96,7 +127,9 @@
                 </x-dropdown>
             </div>
 
-            <!-- Hamburger Menu (Mobile) -->
+            {{-- ======================================================= --}}
+            {{-- NAVIGATION MOBILE (sm:hidden) --}}
+            {{-- ======================================================= --}}
             <div class="-mr-2 flex items-center sm:hidden">
                 <button @click="open = ! open" class="inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-100 focus:outline-none focus:bg-gray-100 focus:text-gray-500 transition duration-150 ease-in-out">
                     <svg class="h-6 w-6" stroke="currentColor" fill="none" viewBox="0 0 24 24">
@@ -108,31 +141,70 @@
         </div>
     </div>
 
-    <!-- Responsive Navigation Menu (Tampilan HP) -->
     <div :class="{'block': open, 'hidden': ! open}" class="hidden sm:hidden">
         <div class="pt-2 pb-3 space-y-1">
+            {{-- Dashboard --}}
             <x-responsive-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">
-                {{ __('Dashboard') }}
+                🏠 {{ __('Dashboard') }}
             </x-responsive-nav-link>
+
+            {{-- Workshop --}}
+            @if (Route::has('workshop'))
+                <x-responsive-nav-link :href="route('workshop')" :active="request()->routeIs('workshop')">
+                    🎨 Workshop
+                </x-responsive-nav-link>
+            @endif
+
+            {{-- Katalog --}}
+            @if (Route::has('collection'))
+                <x-responsive-nav-link :href="route('collection')" :active="request()->routeIs('collection')">
+                    🎁 Katalog
+                </x-responsive-nav-link>
+            @endif
             
+            {{-- Lemari Saya (FIXED KRUSIAL) --}}
+            @if (Route::has('cart.index'))
+                <x-responsive-nav-link :href="route('cart.index')" :active="request()->routeIs('cart.index')">
+                    🧥 Lemari Saya
+                </x-responsive-nav-link>
+            @endif
+            
+            {{-- Link Khusus Role --}}
             @if(Auth::user()->role === 'admin')
                 <x-responsive-nav-link :href="route('admin.dashboard')" class="text-red-600 font-bold">
-                    Admin Panel
+                    🛡️ Admin Panel
                 </x-responsive-nav-link>
             @endif
 
             @if(Auth::user()->role === 'seller')
                 <x-responsive-nav-link :href="route('seller.dashboard')" class="text-green-600 font-bold">
-                    Toko Saya
+                    🏪 Toko Saya
+                </x-responsive-nav-link>
+                <x-responsive-nav-link :href="route('seller.orders')" class="text-green-600 font-bold">
+                    📦 Pesanan
                 </x-responsive-nav-link>
             @endif
         </div>
 
-        <!-- Responsive Settings Options -->
         <div class="pt-4 pb-1 border-t border-gray-200">
+            {{-- ... Bagian Profil Mobile/Responsive ... --}}
             <div class="px-4">
-                <div class="font-medium text-base text-gray-800">{{ Auth::user()->name }}</div>
-                <div class="font-medium text-sm text-gray-500">{{ Auth::user()->email }}</div>
+                {{-- 🌟 INISIAL DI TAMPILAN MOBILE 🌟 --}}
+                <div class="flex items-center mb-2">
+                    @if ($imageUrl)
+                        {{-- Menggunakan asset() untuk path gambar --}}
+                        <img src="{{ asset($imageUrl) }}" alt="{{ $name }}" class="h-10 w-10 rounded-full object-cover border mr-2">
+                    @else
+                        <span class="h-10 w-10 rounded-full flex items-center justify-center text-lg font-bold text-white {{ $color }} mr-2">
+                            {{ $initial }}
+                        </span>
+                    @endif
+                    <div>
+                        <div class="font-medium text-base text-gray-800">{{ Auth::user()->name }}</div>
+                        <div class="font-medium text-sm text-gray-500">{{ Auth::user()->email }}</div>
+                    </div>
+                </div>
+                {{-- END INISIAL --}}
             </div>
 
             <div class="mt-3 space-y-1">
@@ -142,15 +214,15 @@
 
                 @if(Auth::user()->role === 'member')
                     <x-responsive-nav-link :href="route('store.register')" class="text-orange-600 font-bold">
-                        Buka Toko
+                        🏪 Buka Toko
                     </x-responsive-nav-link>
                 @endif
 
                 <form method="POST" action="{{ route('logout') }}">
                     @csrf
                     <x-responsive-nav-link :href="route('logout')"
-                            onclick="event.preventDefault();
-                                        this.closest('form').submit();" class="text-red-600">
+                                            onclick="event.preventDefault();
+                                                        this.closest('form').submit();" class="text-red-600">
                         {{ __('Log Out') }}
                     </x-responsive-nav-link>
                 </form>

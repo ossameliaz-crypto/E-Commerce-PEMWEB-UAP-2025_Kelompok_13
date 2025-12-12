@@ -69,6 +69,14 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+
+    // 🌟 PERBAIKAN KRUSIAL (PENAMBAHAN ROUTE YANG HILANG) 🌟
+    // Rute untuk Update Password
+    Route::put('/password', [ProfileController::class, 'updatePassword'])->name('password.update');
+    
+    // Rute untuk Update Gambar/Logo (Penyebab error 'Route not defined')
+    Route::patch('/profile/image', [ProfileController::class, 'updateImage'])->name('profile.update-image');
+
 });
 
 

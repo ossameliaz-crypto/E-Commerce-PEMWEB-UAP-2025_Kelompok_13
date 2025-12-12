@@ -9,6 +9,9 @@ export default {
         './resources/views/**/*.blade.php',
     ],
 
+    // 🌟 PERBAIKAN: MENAMBAHKAN 'darkMode: false' 🌟
+    darkMode: false, 
+
     theme: {
         extend: {
             fontFamily: {

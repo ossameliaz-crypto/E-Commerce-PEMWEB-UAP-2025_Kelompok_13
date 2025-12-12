@@ -28,12 +28,6 @@
                 <a href="{{ route('seller.dashboard') }}" class="flex items-center gap-3 px-4 py-3 text-gray-500 hover:bg-gray-50 hover:text-gray-900 font-bold rounded-xl transition">
                     <span>🏠</span> Dashboard
                 </a>
-                
-                {{-- Link Produk Saya --}}
-                <a href="{{ route('seller.products.index') }}" class="flex items-center gap-3 px-4 py-3 text-gray-500 hover:bg-gray-50 hover:text-gray-900 font-bold rounded-xl transition">
-                    <span>📦</span> Produk
-                </a>
-
                 {{-- Link Pesanan (ACTIVE) --}}
                 <a href="{{ route('seller.orders') }}" class="flex items-center gap-3 px-4 py-3 bg-orange-50 text-orange-700 font-bold rounded-xl transition shadow-sm border border-orange-100">
                     <span>💰</span> Pesanan
@@ -53,11 +47,6 @@
         </aside>
 
         <main class="flex-1 md:ml-64 p-8">
-            
-            <a href="{{ route('seller.dashboard') }}" class="text-gray-500 hover:text-orange-600 font-bold text-sm mb-6 inline-flex items-center gap-1 transition">
-                <span>⬅️</span> Kembali ke Dashboard
-            </a>
-
             <div class="mb-8 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                 <div>
                     {{-- JUDUL KONTEN BERUBAH --}}

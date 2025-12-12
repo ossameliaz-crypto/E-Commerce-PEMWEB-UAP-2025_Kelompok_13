@@ -4,15 +4,18 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Cart;
-use App\Models\Product;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\View\View; // Tambahkan ini
+use Illuminate\Http\JsonResponse; // Tambahkan ini untuk respons AJAX
+use Illuminate\Http\RedirectResponse; // Tambahkan ini untuk respons redirect
 
 class CartController extends Controller
 {
     // --- Data Konstan ini HARUS SAMA PERSIS dengan array 'items' di builder.blade.php ---
-    private function getHardcodedPrices()
+    private function getHardcodedPrices(): array
     {
+        // Data ini dikembalikan sebagai array. (Tidak ada perubahan pada data ini)
         return [
             'bodies' => [
                 'coklat' => 150000, 'krem' => 150000, 'polar' => 155000, 'panda' => 160000, 
@@ -48,7 +51,7 @@ class CartController extends Controller
     }
     
     // Helper function untuk mendapatkan harga item berdasarkan ID
-    private function getItemPrice($id, $category)
+    private function getItemPrice(?string $id, string $category): int
     {
         $prices = $this->getHardcodedPrices();
         if ($id === null || $id === 'none') return 0;
@@ -59,29 +62,38 @@ class CartController extends Controller
     /**
      * Menampilkan halaman Workshop dan Meneruskan Hitungan Keranjang.
      */
-    public function showWorkshop()
+    public function showWorkshop(): View
     {
+        // Dipanggil oleh route('workshop')
         $cartCount = Auth::check() ? Cart::where('user_id', Auth::id())->count() : 0;
         return view('builder', compact('cartCount'));
     }
     
     /**
-     * Menampilkan isi keranjang (Halaman Wardrobe)
+     * Menampilkan isi keranjang (Halaman Lemari Saya / Cart Index)
      */
-    public function index()
+    public function index(): View
     {
-        // Ambil data keranjang milik user yang sedang login
-        $carts = Cart::where('user_id', Auth::id())
-                     ->orderBy('created_at', 'desc')
-                     ->get();
+        // Dipanggil oleh route('cart.index')
         
-        // Meneruskan cartCount ke view 'wardrobe'
-        $cartCount = $carts->count();
-        return view('wardrobe', compact('carts', 'cartCount'));
+        // Ambil data keranjang milik user yang sedang login
+        $cartItems = Cart::where('user_id', Auth::id())
+                          ->orderBy('created_at', 'desc')
+                          ->get();
+        
+        // Hitung total harga (Total estimasi belum termasuk ongkir)
+        $totalHarga = $cartItems->sum('total_price');
+
+        // FIX: Mengganti view 'wardrobe' menjadi 'member.cart'
+        return view('member.cart', [
+            'cartItems' => $cartItems, 
+            'totalHarga' => $totalHarga,
+        ]);
     }
 
     /**
      * Menyimpan Item dari Workshop ke Database
+     * @return RedirectResponse|JsonResponse
      */
     public function addToCart(Request $request)
     {
@@ -90,21 +102,21 @@ class CartController extends Controller
             'base' => 'required|string',
             'size' => 'required|string',
             'action_type' => 'required|string',
+            // Tambahkan validasi untuk file audio jika voice adalah 'record'
+            'audio_blob' => $request->voice == 'record' ? 'nullable|file|mimes:webm,mp3,ogg,wav|max:5000' : 'nullable', 
         ]);
 
         // 2. Hitung Harga Total (SINKRONISASI HARGA)
         
         // a. Base Price + Size Adjustment
-        $basePrice = $this->getItemPrice($request->base, 'bodies');
+        $totalPrice = $this->getItemPrice($request->base, 'bodies');
         
         if ($request->size === 'S') {
-            $basePrice -= 20000;
+            $totalPrice -= 20000;
         } elseif ($request->size === 'XL') {
-            $basePrice += 50000;
+            $totalPrice += 50000;
         }
         
-        $totalPrice = $basePrice;
-
         // b. Item Kustomisasi lainnya
         $totalPrice += $this->getItemPrice($request->outfit, 'outfits');
         $totalPrice += $this->getItemPrice($request->accessory, 'accessories');
@@ -123,12 +135,14 @@ class CartController extends Controller
         $voicePath = null;
         if ($request->voice == 'record' && $request->hasFile('audio_blob')) {
             $file = $request->file('audio_blob');
-            $filename = 'voice_' . Auth::id() . '_' . time() . '.webm';
+            $filename = 'voice_' . Auth::id() . '_' . time() . '.' . $file->extension();
             
             try {
+                // Simpan file ke storage/app/public/voices
                 $path = $file->storeAs('voices', $filename, 'public');
                 $voicePath = $path;
             } catch (\Exception $e) {
+                // Log error jika diperlukan
                 if ($request->ajax()) {
                     return response()->json(['success' => false, 'message' => 'Gagal menyimpan file rekaman suara.'], 500);
                 }
@@ -159,10 +173,12 @@ class CartController extends Controller
         $cartCount = Cart::where('user_id', Auth::id())->count();
 
         if ($request->action_type == 'buy') {
-            return redirect()->route('checkout')->with('direct_checkout_id', $cart->id);
+            // Langsung ke Checkout (Beli Sekarang)
+            return redirect()->route('checkout')->with('direct_cart_id', $cart->id);
         } 
         
         if ($request->ajax() && $request->action_type == 'cart') {
+             // Respons sukses untuk tombol 'Tambahkan ke Keranjang' (AJAX)
              return response()->json([
                  'success' => true,
                  'cart_count' => $cartCount,
@@ -170,17 +186,19 @@ class CartController extends Controller
              ]);
         }
 
-        return redirect()->route('wardrobe')->with('success', 'Boneka berhasil ditambahkan ke keranjang!');
+        // Default redirect (Misalnya jika tidak menggunakan AJAX atau 'buy')
+        return redirect()->route('cart.index')->with('success', 'Boneka berhasil ditambahkan ke keranjang!');
     }
     
     /**
      * Menghapus Item dari Keranjang (Tunggal)
      */
-    public function destroy($id)
+    public function destroy(int $id): RedirectResponse
     {
         $cart = Cart::where('user_id', Auth::id())->where('id', $id)->first();
         
         if ($cart) {
+            // Hapus file rekaman suara jika ada
             if ($cart->voice_file && Storage::disk('public')->exists($cart->voice_file)) {
                 Storage::disk('public')->delete($cart->voice_file);
             }
@@ -194,8 +212,9 @@ class CartController extends Controller
     /**
      * Menghapus Item dari Keranjang (Massal/Bulk)
      */
-    public function bulkDestroy(Request $request)
+    public function bulkDestroy(Request $request): RedirectResponse
     {
+        // Pastikan input berupa array ID
         $ids = $request->input('selected_ids'); 
         
         if (!empty($ids) && is_array($ids)) {
@@ -203,6 +222,7 @@ class CartController extends Controller
             $deletedCount = 0;
             
             foreach ($cartsToDelete as $cart) {
+                // Hapus file rekaman suara jika ada
                 if ($cart->voice_file && Storage::disk('public')->exists($cart->voice_file)) {
                     Storage::disk('public')->delete($cart->voice_file);
                 }

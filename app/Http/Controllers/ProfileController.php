@@ -8,6 +8,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Redirect;
 use Illuminate\View\View;
+use Illuminate\Support\Facades\File; // Tambahkan ini untuk File/Path lokal
+use Illuminate\Validation\Rule; // Ditambahkan untuk validasi email/Rule
 
 class ProfileController extends Controller
 {
@@ -22,10 +24,11 @@ class ProfileController extends Controller
     }
 
     /**
-     * Update the user's profile information.
+     * Update the user's profile information (Termasuk phone_number).
      */
     public function update(ProfileUpdateRequest $request): RedirectResponse
     {
+        // $request->validated() sekarang sudah mencakup phone_number (Asumsi ProfileUpdateRequest diperbaiki)
         $request->user()->fill($request->validated());
 
         if ($request->user()->isDirty('email')) {
@@ -35,6 +38,52 @@ class ProfileController extends Controller
         $request->user()->save();
 
         return Redirect::route('profile.edit')->with('status', 'profile-updated');
+    }
+
+    /**
+     * Update the user's profile picture or shop logo.
+     */
+    public function updateImage(Request $request): RedirectResponse
+    {
+        // 1. Validasi file gambar
+        $request->validate([
+            // Menggunakan nama input yang umum: 'profile_image' atau 'logo_file'
+            // Asumsi di form Anda menggunakan 'image_file'
+            'image_file' => 'required|image|mimes:jpeg,png,jpg|max:2048', 
+        ]);
+
+        $user = $request->user();
+        
+        if ($request->hasFile('image_file')) {
+            $image = $request->file('image_file');
+            
+            // Membuat nama unik (timestamp + ID user + ekstensi)
+            $imageName = time() . '_' . $user->id . '.' . $image->extension();
+            
+            // 2. Hapus gambar lama (Hanya hapus jika path yang tersimpan di DB tidak NULL)
+            if ($user->profile_picture) { 
+                $oldImagePath = public_path($user->profile_picture);
+                if (File::exists($oldImagePath)) {
+                    File::delete($oldImagePath);
+                }
+            }
+            
+            // 3. Simpan gambar di direktori 'public/profile-images'
+            $image->move(public_path('profile-images'), $imageName);
+            
+            // 4. Simpan path relatif baru ke database
+            $user->profile_picture = 'profile-images/' . $imageName;
+            
+            // 🚀 PERBAIKAN BUG SQLSTATE [image_d7f35a.png]:
+            // Masalah di gambar 'd7f35a.png' adalah Controller/Code lama 
+            // mencoba menyimpan ke kolom 'profile_image_path', yang tidak ada.
+            // Kolom yang benar di DB Anda adalah 'profile_picture'.
+            // Kode di atas SUDAH BENAR menggunakan $user->profile_picture = ...
+            
+            $user->save();
+        }
+
+        return Redirect::route('profile.edit')->with('status', 'image-updated');
     }
 
     /**
@@ -48,6 +97,14 @@ class ProfileController extends Controller
 
         $user = $request->user();
 
+        // 🚨 Hapus gambar profil dari storage sebelum hapus user
+        if ($user->profile_picture) {
+            $imagePath = public_path($user->profile_picture);
+            if (File::exists($imagePath)) {
+                File::delete($imagePath);
+            }
+        }
+        
         Auth::logout();
 
         $user->delete();

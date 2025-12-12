@@ -30,6 +30,10 @@ class RegisteredUserController extends Controller
         $request->validate([
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:'.User::class],
+            
+            // 🚀 PERBAIKAN KRUSIAL 1: Tambahkan validasi phone_number
+            'phone_number' => ['required', 'string', 'max:15'], 
+            
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
         ]);
 
@@ -37,6 +41,10 @@ class RegisteredUserController extends Controller
             'name' => $request->name,
             'email' => $request->email,
             'password' => Hash::make($request->password),
+            
+            // 🚀 PERBAIKAN KRUSIAL 2: Simpan phone_number ke database
+            'phone_number' => $request->phone_number, 
+            
             'role' => 'member', // Default jadi member biasa
         ]);
 

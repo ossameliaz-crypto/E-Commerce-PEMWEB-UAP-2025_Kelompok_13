@@ -22,9 +22,6 @@
                 <a href="{{ route('seller.dashboard') }}" class="flex items-center gap-3 px-4 py-3 bg-orange-50 text-orange-700 font-bold rounded-xl transition">
                     <span>🏠</span> Dashboard 
                 </a>
-                <a href="{{ route('seller.products.index') }}" class="flex items-center gap-3 px-4 py-3 text-gray-500 hover:bg-gray-50 hover:text-gray-900 font-bold rounded-xl transition">
-                    <span>📦</span> Produk 
-                </a>
                 <a href="{{ route('seller.orders') }}" class="flex items-center gap-3 px-4 py-3 text-gray-500 hover:bg-gray-50 hover:text-gray-900 font-bold rounded-xl transition">
                     <span>💰</span> Pesanan
                 </a>
