@@ -6,36 +6,65 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     */
-    public function up(): void
+    public function up()
     {
+        // 1. TABEL TRANSACTIONS (Nota Tagihan)
         Schema::create('transactions', function (Blueprint $table) {
-            $table->id()->primary();
-            $table->string('code')->unique();
-            $table->foreignId('buyer_id')->constrained('users')->cascadeOnDelete();
-            $table->foreignId('store_id')->constrained('stores')->cascadeOnDelete();
-            $table->text('address');
-            $table->string('address_id');
-            $table->string('city');
-            $table->string('postal_code');
-            $table->string('shipping');
-            $table->string('shipping_type');
-            $table->decimal('shipping_cost', 26, 2);
-            $table->string('tracking_number')->nullable();
-            $table->decimal('tax', 26, 2);
-            $table->decimal('grand_total', 26, 2);
-            $table->enum('payment_status', ['unpaid', 'paid'])->default('unpaid');
+            $table->id();
+            $table->foreignId('user_id')->constrained()->onDelete('cascade');
+            $table->string('invoice_code')->unique(); // Contoh: TRX-998811
+            
+            // Info Pengiriman
+            $table->string('recipient_name');
+            $table->string('recipient_phone');
+            $table->text('address'); // Alamat lengkap gabungan
+            $table->string('courier');
+            $table->decimal('shipping_cost', 12, 2);
+            
+            $table->decimal('total_price', 12, 2); // Total Akhir (Barang + Ongkir)
+            $table->string('status')->default('pending_payment'); 
+            $table->timestamps();
+        });
+
+        // 2. TABEL TRANSACTION DETAILS (Detail Boneka Custom)
+        Schema::create('transaction_details', function (Blueprint $table) {
+            $table->id();
+            $table->foreignId('transaction_id')->constrained('transactions')->onDelete('cascade');
+            
+            // --- INI KOLOM YANG KITA TAMBAH BIAR LENGKAP ---
+            $table->string('base_model');       // choco, panda, dll
+            $table->string('size');             // S, M, XL
+            $table->string('outfit_id')->nullable();     // Baju apa
+            $table->string('accessory_id')->nullable();  // Aksesoris apa
+            
+            // Suara & Rekaman
+            $table->string('voice_type')->nullable();    // Jenis suara (love, bday, record)
+            $table->string('voice_file')->nullable();    // Path file rekaman suara (PENTING)
+            
+            $table->string('scent_type')->nullable();    // Wangi
+            $table->string('gift_box')->nullable();      // Bungkus kado
+            $table->text('card_message')->nullable();    // Pesan kartu
+            $table->boolean('is_dressed')->default(false);
+            
+            $table->decimal('price', 12, 2); // Harga per item saat beli
+            $table->timestamps();
+        });
+
+        // 3. TABEL PAYMENTS (Simpan Bukti Bayar)
+        Schema::create('payments', function (Blueprint $table) {
+            $table->id();
+            $table->foreignId('transaction_id')->constrained('transactions')->onDelete('cascade');
+            $table->string('payment_method');
+            $table->decimal('amount', 12, 2);
+            $table->string('status')->default('pending');
             $table->timestamps();
         });
     }
 
-    /**
-     * Reverse the migrations.
-     */
-    public function down(): void
+    public function down()
     {
+        Schema::dropIfExists('payments');
+        Schema::dropIfExists('transaction_details');
         Schema::dropIfExists('transactions');
     }
 };

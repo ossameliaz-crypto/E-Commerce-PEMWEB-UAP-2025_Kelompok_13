@@ -76,7 +76,8 @@ Route::middleware(['auth'])->group(function () {
     
     // Rute untuk Update Gambar/Logo (Penyebab error 'Route not defined')
     Route::patch('/profile/image', [ProfileController::class, 'updateImage'])->name('profile.update-image');
-
+// Tambahkan {id} karena kita butuh ID Order, dan ganti 'payment' jadi 'showPayment'
+Route::get('/payment/{id}', [TransactionController::class, 'showPayment'])->name('payment.show');
 });
 
 

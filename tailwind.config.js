@@ -9,8 +9,9 @@ export default {
         './resources/views/**/*.blade.php',
     ],
 
-    // 🌟 PERBAIKAN: MENAMBAHKAN 'darkMode: false' 🌟
-    darkMode: false, 
+    // ✅ GANTI JADI INI:
+    // 'class' artinya dark mode cuma aktif kalau kita suruh (tidak otomatis ngikut sistem)
+    darkMode: 'class', 
 
     theme: {
         extend: {

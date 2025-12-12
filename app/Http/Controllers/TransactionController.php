@@ -8,18 +8,15 @@ use App\Models\Transaction;
 use App\Models\TransactionDetail;
 use App\Models\Product; 
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\DB; // Tambahkan ini jika menggunakan DB Transactions
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Js; // Tambahkan ini untuk helper JS
 
 class TransactionController extends Controller
 {
-    /**
-     * Menampilkan Halaman Checkout
-     */
     public function checkout()
     {
         $selectedIds = request()->query('selected_ids', []);
         
-        // Ambil item yang ID-nya ada di selected_ids dari Keranjang
         $carts = Cart::where('user_id', Auth::id())
                      ->whereIn('id', $selectedIds)
                      ->get();
@@ -30,24 +27,19 @@ class TransactionController extends Controller
 
         $cartTotal = $carts->sum('total_price');
 
-        // Meneruskan carts (item yang akan diproses) dan total harga ke view checkout
         return view('checkout', compact('carts', 'cartTotal'));
     }
 
-    /**
-     * Proses Simpan Transaksi (Saat klik Bayar)
-     */
     public function store(Request $request)
     {
-        // 1. Validasi Input
         $request->validate([
             'name' => 'required|string|max:255',
             'phone' => 'required|string|max:20',
             'address' => 'required|string',
             'city' => 'required|string',
             'postal_code' => 'required|string|max:10',
-            'shipping_courier' => 'required|string', // Kurir yang dipilih
-            'shipping_cost' => 'required|numeric', // Biaya kirim dari AlpineJS
+            'shipping_courier' => 'required|string',
+            'shipping_cost' => 'required|numeric',
             'item_ids' => 'required|array',
             'item_ids.*' => 'exists:carts,id',
         ]);
@@ -59,18 +51,15 @@ class TransactionController extends Controller
             return redirect()->route('wardrobe')->with('error', 'Tidak ada item yang akan diproses.');
         }
 
-        // 2. Hitung Total & Ongkir dari Request
         $subtotal = $carts->sum('total_price');
         $shippingCost = $request->input('shipping_cost');
         $grandTotal = $subtotal + $shippingCost;
 
-        // 3. Simpan Transaksi Utama & Detail
         try {
             DB::beginTransaction();
 
-            // ASUMSI: Kolom di tabel transactions adalah user_id
             $transaction = Transaction::create([
-                'user_id' => Auth::id(),
+                'user_id' => Auth::id(), // Pastikan migration user_id sudah dijalankan
                 'invoice_code' => 'TRX-' . time() . rand(100,999),
                 'status' => 'pending',
                 'total_price' => $grandTotal, 
@@ -78,7 +67,7 @@ class TransactionController extends Controller
                 'recipient_phone' => $request->input('phone'),
                 'address' => $request->input('address') . ', ' . $request->input('city') . ', ' . $request->input('postal_code'),
                 'courier' => $request->input('shipping_courier'),
-                'shipping_cost' => $shippingCost, // Tambahkan biaya kirim ke tabel Transaction
+                'shipping_cost' => $shippingCost,
                 'resi_number' => null,
             ]);
 
@@ -86,7 +75,6 @@ class TransactionController extends Controller
             $safeProductId = $defaultProduct ? $defaultProduct->id : 1; 
 
             foreach ($carts as $cart) {
-                
                 $voiceInfo = $cart->voice_type;
                 if ($cart->voice_type === 'record' && $cart->voice_file) {
                     $voiceInfo = 'Rekaman: ' . $cart->voice_file;
@@ -107,7 +95,6 @@ class TransactionController extends Controller
                 ]);
             }
 
-            // 4. Hapus Keranjang (Hanya item yang sudah diproses)
             Cart::where('user_id', Auth::id())->whereIn('id', $itemIdsToProcess)->delete();
             
             DB::commit();
@@ -115,11 +102,9 @@ class TransactionController extends Controller
         } catch (\Exception $e) {
             DB::rollBack();
             \Log::error('Transaction failed: ' . $e->getMessage());
-            // Mengalihkan ke Wardrobe jika ada error
-            return redirect()->route('wardrobe')->with('error', 'Gagal memproses transaksi. Mohon coba lagi. (Error: ' . $e->getMessage() . ')');
+            return redirect()->route('wardrobe')->with('error', 'Gagal memproses transaksi: ' . $e->getMessage());
         }
 
-        // 5. Redirect ke Payment
         return redirect()->route('payment');
     }
 
@@ -128,12 +113,45 @@ class TransactionController extends Controller
         return view('payment');
     }
 
+    /**
+     * PERBAIKAN UTAMA DI SINI
+     * Kita format datanya di Controller supaya View bersih & tidak error
+     */
     public function history()
     {
-        $transactions = Transaction::where('user_id', Auth::id())
-                                   ->with('details')
-                                   ->latest()
-                                   ->get();
+        $rawTransactions = Transaction::where('user_id', Auth::id())
+                                      ->with('details')
+                                      ->latest()
+                                      ->get();
+
+        // Format data menjadi Array/JSON-ready structure
+        $transactions = $rawTransactions->map(function($t) {
+            $firstDetail = $t->details->first();
+            $itemsDesc = '';
+            
+            if ($firstDetail) {
+                $itemsDesc = 'Size: ' . $firstDetail->size . 
+                             ($firstDetail->outfit_id ? ' + Baju' : '') . 
+                             ($firstDetail->accessory_id ? ' + Aksesoris' : '');
+            }
+
+            return [
+                'id' => $t->invoice_code, 
+                // Menggunakan format tanggal Indonesia
+                'date' => \Carbon\Carbon::parse($t->created_at)->isoFormat('D MMMM Y'), 
+                'total' => $t->total_price, 
+                'status' => $t->status, // pending, shipped, completed
+                'resi' => $t->resi_number ?? 'Belum ada',
+                'items' => [
+                    [
+                        'name' => ucfirst($firstDetail->base_model ?? 'Produk') . ' Bear', 
+                        'desc' => $itemsDesc
+                    ]
+                ],
+            ];
+        });
+
+        // Kirim $transactions yang sudah rapi ke view
         return view('history', compact('transactions'));
     }
 }

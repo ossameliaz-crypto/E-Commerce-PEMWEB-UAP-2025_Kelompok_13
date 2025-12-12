@@ -6,354 +6,344 @@
     <title>Pembayaran - Build-A-Teddy</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
-    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
     <style>
-        body { font-family: 'Nunito', sans-serif; } 
-        [x-cloak] { display: none; }
-        .loader { border: 3px solid #f3f3f3; border-top: 3px solid #ea580c; border-radius: 50%; width: 24px; height: 24px; animation: spin 1s linear infinite; }
+        body { font-family: 'Nunito', sans-serif; background-color: #FFFBF5; } 
+        [x-cloak] { display: none !important; }
+        
+        .hide-scroll::-webkit-scrollbar { width: 4px; }
+        .hide-scroll::-webkit-scrollbar-thumb { background: #fed7aa; border-radius: 4px; }
+        .hide-scroll::-webkit-scrollbar-track { background: transparent; }
+
+        .loader { border: 4px solid #f3f3f3; border-top: 4px solid #ea580c; border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-        /* Kelas warna yang disesuaikan */
-        .bg-blue-800 { background-color: #004D99; }
-        .bg-blue-600 { background-color: #0076BC; }
-        .bg-yellow-400 { background-color: #FF7000; }
-        .bg-orange-600 { background-color: #F97316; }
-        .bg-green-600 { background-color: #008744; }
-        .bg-purple-600 { background-color: #6C559A; }
-        .bg-blue-400 { background-color: #1088E0; }
-        .bg-red-600 { background-color: #E21B22; }
-        .text-orange-600 { color: #ea580c; }
-        .bg-orange-50 { background-color: #fff7ed; }
-        .border-orange-500 { border-color: #ea580c; }
+        
+        /* Bank Colors */
+        .bg-bca { background-color: #004D99; }
+        .bg-bri { background-color: #00529C; }
+        .bg-mandiri { background-color: #FFB700; color: #003D79; }
+        .bg-bni { background-color: #F15A23; }
+        .bg-permata { background-color: #00A651; }
+        .bg-cimb { background-color: #DA291C; }
+        .bg-bsi { background-color: #00A39D; }
+        .bg-danamon { background-color: #F58220; }
     </style>
     <script>
         window.formatRupiah = (angka) => {
-            const number = Number(angka) || 0;
-            return 'Rp ' + number.toLocaleString('id-ID');
+            return 'Rp ' + Number(angka).toLocaleString('id-ID');
         };
     </script>
 </head>
-<body class="bg-gray-100 min-h-screen pb-20">
+<body class="bg-[#FFFBF5] min-h-screen pb-20 text-gray-700">
 
-    <nav class="bg-white border-b border-gray-200 py-4 shadow-sm sticky top-0 z-50">
-        <div class="max-w-5xl mx-auto px-4 flex items-center gap-4">
-            <a href="{{ url('/') }}" class="text-3xl">🧸</a>
+    <nav class="bg-white/90 backdrop-blur-md border-b border-orange-100 py-4 shadow-sm sticky top-0 z-50">
+        <div class="max-w-5xl mx-auto px-6 flex items-center gap-3">
+            <span class="text-3xl bg-orange-50 p-1 rounded-lg border border-orange-100">🧸</span>
             <div class="h-8 w-px bg-gray-300"></div>
-            <h1 class="text-xl font-bold text-gray-700">Kasir Pembayaran</h1>
+            <div>
+                <h1 class="text-lg font-black text-gray-800 tracking-tight">Kasir Pembayaran</h1>
+                <p class="text-xs text-gray-400 font-bold">Secure Checkout</p>
+            </div>
         </div>
     </nav>
 
-    <div class="max-w-5xl mx-auto px-6 md:px-10"
-          x-data="{ 
-              paymentMethod: 'va_bca', 
-              category: 'transfer', 
-              step: 1,
-              // Data Disuntikkan dari Controller
-              amount: {{ $totalAmount ?? 0 }}, 
-              shippingFee: {{ $shippingFee ?? 0 }}, 
-              totalDue: {{ $totalDue ?? 0 }}, 
-              
-              vaNumber: '', 
-              
-              // LOGIKA TIMER
-              countdown: 86400, 
-              timerDisplay: '24:00:00',
-              
-              item: { name: 'Custom Teddy', outfit: 'Kustomisasi', acc: '' }, 
+    <div class="max-w-5xl mx-auto px-4 md:px-8 mt-8"
+         x-data="{ 
+             step: 1, 
+             paymentMethod: 'va_bca', 
+             category: 'transfer', 
+             
+             // --- DATA MANIPULASI (Fixed Data) ---
+             totalDue: 198000, 
+             
+             vaNumber: '', 
+             countdown: 86400, 
+             timerDisplay: '24:00:00',
+             
+             startTimer() {
+                 let timer = setInterval(() => {
+                     if (this.countdown <= 0) {
+                         clearInterval(timer);
+                         this.timerDisplay = 'Waktu Habis';
+                     } else {
+                         this.countdown--;
+                         const h = Math.floor(this.countdown / 3600);
+                         const m = Math.floor((this.countdown % 3600) / 60);
+                         const s = this.countdown % 60;
+                         this.timerDisplay = String(h).padStart(2,'0') + ':' + String(m).padStart(2,'0') + ':' + String(s).padStart(2,'0');
+                     }
+                 }, 1000); 
+             },
 
-              startTimer() {
-                  let timer = setInterval(() => {
-                      if (this.countdown <= 0) {
-                          clearInterval(timer);
-                          this.timerDisplay = 'Waktu Habis';
-                      } else {
-                          this.countdown--;
-                          const hours = Math.floor(this.countdown / 3600);
-                          const minutes = Math.floor((this.countdown % 3600) / 60);
-                          const seconds = this.countdown % 60;
-                          
-                          this.timerDisplay = 
-                              String(hours).padStart(2, '0') + ':' + 
-                              String(minutes).padStart(2, '0') + ':' + 
-                              String(seconds).padStart(2, '0');
-                      }
-                  }, 1000); 
-              },
+             processPayment() {
+                 this.step = 2; // Loading
+                 window.scrollTo({ top: 0, behavior: 'smooth' });
+                 
+                 setTimeout(() => {
+                     // Generate Data Dummy
+                     if(this.paymentMethod.includes('bca')) this.vaNumber = '8806 0812 3456 7890';
+                     else if(this.paymentMethod.includes('bri')) this.vaNumber = '1299 0812 3456 7890';
+                     else if(this.paymentMethod.includes('mandiri')) this.vaNumber = '8900 0812 3456 7890';
+                     else if(this.paymentMethod.includes('bni')) this.vaNumber = '9881 0812 3456 7890';
+                     else if(this.paymentMethod.includes('permata')) this.vaNumber = '8665 0812 3456 7890';
+                     else if(this.paymentMethod.includes('cimb')) this.vaNumber = '7788 0812 3456 7890';
+                     else if(this.paymentMethod.includes('bsi')) this.vaNumber = '5566 0812 3456 7890';
+                     else if(this.paymentMethod.includes('danamon')) this.vaNumber = '3344 0812 3456 7890';
+                     else if(this.paymentMethod === 'cod') this.vaNumber = 'COD';
+                     else if(['alfa', 'indo', 'alfamidi', 'lawson', 'dandan'].includes(this.paymentMethod)) this.vaNumber = 'PAY-' + Math.floor(Math.random() * 999999);
+                     else this.vaNumber = 'QRIS'; 
 
-              processPayment() {
-                  this.step = 2; // Loading
-                  
-                  setTimeout(() => {
-                      // GENERATE NOMOR SESUAI METODE
-                      if(this.paymentMethod === 'va_bca') this.vaNumber = '8806 0812 3456 7890';
-                      else if(this.paymentMethod === 'va_bri') this.vaNumber = '1299 0812 3456 7890';
-                      else if(this.paymentMethod === 'va_mandiri') this.vaNumber = '8900 0812 3456 7890';
-                      else if(this.paymentMethod === 'va_bni') this.vaNumber = '9881 0812 3456 7890';
-                      else if(this.paymentMethod === 'va_permata') this.vaNumber = '8665 0812 3456 7890';
-                      else if(this.paymentMethod === 'alfa') this.vaNumber = 'ALFA-TRX-998821';
-                      else if(this.paymentMethod === 'indo') this.vaNumber = 'INDO-TRX-772100';
-                      else if(this.paymentMethod === 'alfamidi') this.vaNumber = 'MIDI-TRX-442211';
-                      else this.vaNumber = 'QRIS';
+                     this.step = 3; 
+                     if(this.paymentMethod !== 'cod') this.startTimer(); 
+                 }, 2000); 
+             },
 
-                      this.step = 3; 
-                      this.startTimer(); 
-                      window.scrollTo({ top: 0, behavior: 'smooth' });
-                  }, 2000);
-              },
+             copyToClipboard(text) {
+                 navigator.clipboard.writeText(text);
+                 alert('Nomor disalin!');
+             }
+         }">
 
-              copyToClipboard(text) {
-                  navigator.clipboard.writeText(text);
-                  alert('Nomor berhasil disalin!');
-              }
-            }">
-
-        <div x-show="step === 1" class="flex flex-col md:flex-row gap-6 mt-8" x-transition>
+        <div x-show="step === 1" x-transition.opacity>
             
-            <div class="w-full md:w-3/4 bg-white shadow-sm rounded-2xl overflow-hidden flex flex-col md:flex-row min-h-[600px]">
+            <div class="bg-white shadow-xl shadow-orange-100/50 border border-white rounded-[2rem] overflow-hidden flex flex-col md:flex-row min-h-[600px]">
                 
-                <div class="w-full md:w-1/4 bg-gray-50 border-r border-gray-200 p-2 space-y-1">
-                    <button @click="category = 'transfer'" :class="category === 'transfer' ? 'bg-white text-orange-600 shadow-sm border-l-4 border-orange-500' : 'text-gray-600 hover:bg-gray-100'" class="w-full text-left px-4 py-3 font-bold text-sm rounded-r-lg transition flex items-center gap-2">
-                        <span>🏦</span> Virtual Account
+                <div class="w-full md:w-1/4 bg-gray-50/80 p-4 space-y-2 border-r border-gray-100">
+                    <p class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2 px-4 mt-2">Kategori</p>
+                    
+                    <button @click="category = 'transfer'" 
+                            :class="category === 'transfer' ? 'bg-white text-orange-600 shadow-md ring-1 ring-orange-100' : 'text-gray-500 hover:bg-white hover:text-gray-700'" 
+                            class="w-full text-left px-4 py-3 font-bold text-sm rounded-xl transition-all flex items-center gap-3">
+                        <span class="text-lg">🏦</span> Transfer Bank
                     </button>
-                    <button @click="category = 'ewallet'" :class="category === 'ewallet' ? 'bg-white text-orange-600 shadow-sm border-l-4 border-orange-500' : 'text-gray-600 hover:bg-gray-100'" class="w-full text-left px-4 py-3 font-bold text-sm rounded-r-lg transition flex items-center gap-2">
-                        <span>📱</span> E-Wallet / QRIS
+                    
+                    <button @click="category = 'ewallet'" 
+                            :class="category === 'ewallet' ? 'bg-white text-orange-600 shadow-md ring-1 ring-orange-100' : 'text-gray-500 hover:bg-white hover:text-gray-700'" 
+                            class="w-full text-left px-4 py-3 font-bold text-sm rounded-xl transition-all flex items-center gap-3">
+                        <span class="text-lg">📱</span> E-Wallet
                     </button>
-                    <button @click="category = 'offline'" :class="category === 'offline' ? 'bg-white text-orange-600 shadow-sm border-l-4 border-orange-500' : 'text-gray-600 hover:bg-gray-100'" class="w-full text-left px-4 py-3 font-bold text-sm rounded-r-lg transition flex items-center gap-2">
-                        <span>🏪</span> Minimarket
+                    
+                    <button @click="category = 'offline'" 
+                            :class="category === 'offline' ? 'bg-white text-orange-600 shadow-md ring-1 ring-orange-100' : 'text-gray-500 hover:bg-white hover:text-gray-700'" 
+                            class="w-full text-left px-4 py-3 font-bold text-sm rounded-xl transition-all flex items-center gap-3">
+                        <span class="text-lg">🏪</span> Minimarket
+                    </button>
+
+                    <button @click="category = 'cod'" 
+                            :class="category === 'cod' ? 'bg-white text-orange-600 shadow-md ring-1 ring-orange-100' : 'text-gray-500 hover:bg-white hover:text-gray-700'" 
+                            class="w-full text-left px-4 py-3 font-bold text-sm rounded-xl transition-all flex items-center gap-3">
+                        <span class="text-lg">📦</span> COD
                     </button>
                 </div>
 
-                <div class="w-full md:w-3/4 p-8 overflow-y-auto max-h-[600px] hide-scroll">
-                    <h3 class="text-lg font-bold text-gray-800 mb-6">Pilih Metode Pembayaran</h3>
+                <div class="w-full md:w-3/4 flex flex-col">
+                    <div class="p-8 flex-1 overflow-y-auto max-h-[600px] hide-scroll">
+                        <h3 class="text-xl font-black text-gray-800 mb-6 flex items-center gap-2">
+                            <span>Pilih Metode Pembayaran</span>
+                            <span class="text-xs bg-green-100 text-green-700 px-2 py-1 rounded-full font-bold">Otomatis</span>
+                        </h3>
 
-                    <div x-show="category === 'transfer'" class="space-y-3" x-transition>
-                        <label class="flex items-center gap-4 p-4 border rounded-xl cursor-pointer hover:border-orange-500 transition group" :class="paymentMethod === 'va_bca' ? 'border-orange-500 bg-orange-50 ring-1 ring-orange-500' : 'border-gray-200'">
-                            <input type="radio" name="pay" value="va_bca" x-model="paymentMethod" class="text-orange-600 focus:ring-orange-500">
-                            <div class="w-14 h-8 bg-blue-800 rounded flex items-center justify-center text-white font-bold text-xs italic">BCA</div>
-                            <div><span class="font-bold text-gray-700 block">Bank BCA</span><span class="text-xs text-gray-500">Cek Otomatis</span></div>
-                        </label>
-                        <label class="flex items-center gap-4 p-4 border rounded-xl cursor-pointer hover:border-orange-500 transition group" :class="paymentMethod === 'va_bri' ? 'border-orange-500 bg-orange-50 ring-1 ring-orange-500' : 'border-gray-200'">
-                            <input type="radio" name="pay" value="va_bri" x-model="paymentMethod" class="text-orange-600 focus:ring-orange-500">
-                            <div class="w-14 h-8 bg-blue-600 rounded flex items-center justify-center text-white font-bold text-xs">BRI</div>
-                            <div><span class="font-bold text-gray-700 block">Bank BRI</span><span class="text-xs text-gray-500">Cek Otomatis</span></div>
-                        </label>
-                        <label class="flex items-center gap-4 p-4 border rounded-xl cursor-pointer hover:border-orange-500 transition group" :class="paymentMethod === 'va_mandiri' ? 'border-orange-500 bg-orange-50 ring-1 ring-orange-500' : 'border-gray-200'">
-                            <input type="radio" name="pay" value="va_mandiri" x-model="paymentMethod" class="text-orange-600 focus:ring-orange-500">
-                            <div class="w-14 h-8 bg-yellow-400 rounded flex items-center justify-center text-blue-900 font-bold text-xs">Mandiri</div>
-                            <div><span class="font-bold text-gray-700 block">Bank Mandiri</span><span class="text-xs text-gray-500">Cek Otomatis</span></div>
-                        </label>
-                           <label class="flex items-center gap-4 p-4 border rounded-xl cursor-pointer hover:border-orange-500 transition group" :class="paymentMethod === 'va_bni' ? 'border-orange-500 bg-orange-50 ring-1 ring-orange-500' : 'border-gray-200'">
-                            <input type="radio" name="pay" value="va_bni" x-model="paymentMethod" class="text-orange-600 focus:ring-orange-500">
-                            <div class="w-14 h-8 bg-orange-600 rounded flex items-center justify-center text-white font-bold text-xs">BNI</div>
-                            <div><span class="font-bold text-gray-700 block">Bank BNI</span><span class="text-xs text-gray-500">Cek Otomatis</span></div>
-                        </label>
-                           <label class="flex items-center gap-4 p-4 border rounded-xl cursor-pointer hover:border-orange-500 transition group" :class="paymentMethod === 'va_permata' ? 'border-orange-500 bg-orange-50 ring-1 ring-orange-500' : 'border-gray-200'">
-                            <input type="radio" name="pay" value="va_permata" x-model="paymentMethod" class="text-orange-600 focus:ring-orange-500">
-                            <div class="w-14 h-8 bg-green-600 rounded flex items-center justify-center text-white font-bold text-xs">Permata</div>
-                            <div><span class="font-bold text-gray-700 block">Bank Permata</span><span class="text-xs text-gray-500">Cek Otomatis</span></div>
-                        </label>
-                    </div>
-
-                    <div x-show="category === 'ewallet'" class="space-y-3" x-transition>
-                        <label class="flex items-center gap-4 p-4 border rounded-xl cursor-pointer hover:border-orange-500 transition" :class="paymentMethod === 'shopeepay' ? 'border-orange-500 bg-orange-50 ring-1 ring-orange-500' : 'border-gray-200'">
-                            <input type="radio" name="pay" value="shopeepay" x-model="paymentMethod" class="text-orange-600 focus:ring-orange-500">
-                            <div class="w-14 h-8 bg-orange-600 rounded flex items-center justify-center text-white font-bold text-[10px]">Shopee</div>
-                            <div><span class="font-bold text-gray-700 block">ShopeePay</span><span class="text-xs text-gray-500">Scan QR Code</span></div>
-                        </label>
-                        <label class="flex items-center gap-4 p-4 border rounded-xl cursor-pointer hover:border-orange-500 transition" :class="paymentMethod === 'gopay' ? 'border-orange-500 bg-orange-50 ring-1 ring-orange-500' : 'border-gray-200'">
-                            <input type="radio" name="pay" value="gopay" x-model="paymentMethod" class="text-orange-600 focus:ring-orange-500">
-                            <div class="w-14 h-8 bg-green-600 rounded flex items-center justify-center text-white font-bold text-[10px]">GoPay</div>
-                            <div><span class="font-bold text-gray-700 block">GoPay</span><span class="text-xs text-gray-500">Scan QR Code</span></div>
-                        </label>
-                        <label class="flex items-center gap-4 p-4 border rounded-xl cursor-pointer hover:border-orange-500 transition" :class="paymentMethod === 'ovo' ? 'border-orange-500 bg-orange-50 ring-1 ring-orange-500' : 'border-gray-200'">
-                            <input type="radio" name="pay" value="ovo" x-model="paymentMethod" class="text-orange-600 focus:ring-orange-500">
-                            <div class="w-14 h-8 bg-purple-600 rounded flex items-center justify-center text-white font-bold text-[10px]">OVO</div>
-                            <div><span class="font-bold text-gray-700 block">OVO</span><span class="text-xs text-gray-500">Scan QR Code</span></div>
-                        </label>
-                           <label class="flex items-center gap-4 p-4 border rounded-xl cursor-pointer hover:border-orange-500 transition" :class="paymentMethod === 'dana' ? 'border-orange-500 bg-orange-50 ring-1 ring-orange-500' : 'border-gray-200'">
-                            <input type="radio" name="pay" value="dana" x-model="paymentMethod" class="text-orange-600 focus:ring-orange-500">
-                            <div class="w-14 h-8 bg-blue-400 rounded flex items-center justify-center text-white font-bold text-[10px]">DANA</div>
-                            <div><span class="font-bold text-gray-700 block">DANA</span><span class="text-xs text-gray-500">Scan QR Code</span></div>
-                        </label>
-                           <label class="flex items-center gap-4 p-4 border rounded-xl cursor-pointer hover:border-orange-500 transition" :class="paymentMethod === 'linkaja' ? 'border-orange-500 bg-orange-50 ring-1 ring-orange-500' : 'border-gray-200'">
-                            <input type="radio" name="pay" value="linkaja" x-model="paymentMethod" class="text-orange-600 focus:ring-orange-500">
-                            <div class="w-14 h-8 bg-red-600 rounded flex items-center justify-center text-white font-bold text-[10px]">LinkAja</div>
-                            <div><span class="font-bold text-gray-700 block">LinkAja</span><span class="text-xs text-gray-500">Scan QR Code</span></div>
-                        </label>
-                    </div>
-
-                    <div x-show="category === 'offline'" class="space-y-3" x-transition>
-                        <label class="flex items-center gap-4 p-4 border rounded-xl cursor-pointer hover:border-orange-500 transition" :class="paymentMethod === 'alfa' ? 'border-orange-500 bg-orange-50 ring-1 ring-orange-500' : 'border-gray-200'">
-                            <input type="radio" name="pay" value="alfa" x-model="paymentMethod" class="text-orange-600 focus:ring-orange-500">
-                            <div class="w-14 h-8 bg-red-600 rounded flex items-center justify-center text-white font-bold text-[10px]">ALFA</div>
-                            <div><span class="font-bold text-gray-700 block">Alfamart</span><span class="text-xs text-gray-500">Bayar di Kasir</span></div>
-                        </label>
-                           <label class="flex items-center gap-4 p-4 border rounded-xl cursor-pointer hover:border-orange-500 transition" :class="paymentMethod === 'indo' ? 'border-orange-500 bg-orange-50 ring-1 ring-orange-500' : 'border-gray-200'">
-                            <input type="radio" name="pay" value="indo" x-model="paymentMethod" class="text-orange-600 focus:ring-orange-500">
-                            <div class="w-14 h-8 bg-blue-600 rounded flex items-center justify-center text-white font-bold text-[10px] border-b-4 border-red-500">INDO</div>
-                            <div><span class="font-bold text-gray-700 block">Indomaret</span><span class="text-xs text-gray-500">Bayar di Kasir</span></div>
-                        </label>
-                           <label class="flex items-center gap-4 p-4 border rounded-xl cursor-pointer hover:border-orange-500 transition" :class="paymentMethod === 'alfamidi' ? 'border-orange-500 bg-orange-50 ring-1 ring-orange-500' : 'border-gray-200'">
-                            <input type="radio" name="pay" value="alfamidi" x-model="paymentMethod" class="text-orange-600 focus:ring-orange-500">
-                            <div class="w-14 h-8 bg-red-600 rounded flex items-center justify-center text-white font-bold text-[10px]">MIDI</div>
-                            <div><span class="font-bold text-gray-700 block">Alfamidi</span><span class="text-xs text-gray-500">Bayar di Kasir</span></div>
-                        </label>
-                    </div>
-                </div>
-            </div>
-
-            <div class="w-full md:w-1/4">
-                <div class="bg-white shadow-sm rounded-2xl p-6 sticky top-24 border border-gray-100">
-                    
-                    <h3 class="font-bold text-gray-700 mb-4 border-b pb-2">Rincian Tagihan</h3>
-                    
-                    <div class="flex gap-3 mb-4">
-                        <div class="w-12 h-12 bg-gray-200 rounded-lg flex items-center justify-center text-xl">🧸</div>
-                        <div class="text-sm">
-                            <p class="font-bold text-gray-800" x-text="item.name"></p>
-                            <p class="text-xs text-gray-500">Kustomisasi + Ongkir</p>
+                        <div x-show="category === 'transfer'" class="grid grid-cols-1 md:grid-cols-2 gap-4" x-transition>
+                            <label class="group flex items-center gap-3 p-4 border-2 rounded-2xl cursor-pointer hover:border-blue-600 hover:bg-blue-50 transition" :class="paymentMethod === 'va_bca' ? 'border-blue-600 bg-blue-50' : 'border-gray-100'">
+                                <input type="radio" name="pay" value="va_bca" x-model="paymentMethod" class="w-4 h-4 accent-blue-600">
+                                <div class="w-12 h-8 bg-bca rounded text-white flex items-center justify-center text-xs font-bold shadow-sm">BCA</div>
+                                <span class="font-bold text-sm text-gray-700">BCA Virtual Account</span>
+                            </label>
+                            <label class="group flex items-center gap-3 p-4 border-2 rounded-2xl cursor-pointer hover:border-blue-600 hover:bg-blue-50 transition" :class="paymentMethod === 'va_bri' ? 'border-blue-600 bg-blue-50' : 'border-gray-100'">
+                                <input type="radio" name="pay" value="va_bri" x-model="paymentMethod" class="w-4 h-4 accent-blue-600">
+                                <div class="w-12 h-8 bg-bri rounded text-white flex items-center justify-center text-xs font-bold shadow-sm">BRI</div>
+                                <span class="font-bold text-sm text-gray-700">BRI Virtual Account</span>
+                            </label>
+                            <label class="group flex items-center gap-3 p-4 border-2 rounded-2xl cursor-pointer hover:border-yellow-500 hover:bg-yellow-50 transition" :class="paymentMethod === 'va_mandiri' ? 'border-yellow-500 bg-yellow-50' : 'border-gray-100'">
+                                <input type="radio" name="pay" value="va_mandiri" x-model="paymentMethod" class="w-4 h-4 accent-yellow-600">
+                                <div class="w-12 h-8 bg-mandiri rounded text-blue-900 flex items-center justify-center text-xs font-bold shadow-sm">MDR</div>
+                                <span class="font-bold text-sm text-gray-700">Mandiri VA</span>
+                            </label>
+                            <label class="group flex items-center gap-3 p-4 border-2 rounded-2xl cursor-pointer hover:border-orange-500 hover:bg-orange-50 transition" :class="paymentMethod === 'va_bni' ? 'border-orange-500 bg-orange-50' : 'border-gray-100'">
+                                <input type="radio" name="pay" value="va_bni" x-model="paymentMethod" class="w-4 h-4 accent-orange-600">
+                                <div class="w-12 h-8 bg-bni rounded text-white flex items-center justify-center text-xs font-bold shadow-sm">BNI</div>
+                                <span class="font-bold text-sm text-gray-700">BNI Virtual Account</span>
+                            </label>
+                            <label class="group flex items-center gap-3 p-4 border-2 rounded-2xl cursor-pointer hover:border-green-500 hover:bg-green-50 transition" :class="paymentMethod === 'va_permata' ? 'border-green-500 bg-green-50' : 'border-gray-100'">
+                                <input type="radio" name="pay" value="va_permata" x-model="paymentMethod" class="w-4 h-4 accent-green-600">
+                                <div class="w-12 h-8 bg-permata rounded text-white flex items-center justify-center text-xs font-bold shadow-sm">PER</div>
+                                <span class="font-bold text-sm text-gray-700">Permata VA</span>
+                            </label>
+                            <label class="group flex items-center gap-3 p-4 border-2 rounded-2xl cursor-pointer hover:border-red-600 hover:bg-red-50 transition" :class="paymentMethod === 'va_cimb' ? 'border-red-600 bg-red-50' : 'border-gray-100'">
+                                <input type="radio" name="pay" value="va_cimb" x-model="paymentMethod" class="w-4 h-4 accent-red-600">
+                                <div class="w-12 h-8 bg-cimb rounded text-white flex items-center justify-center text-xs font-bold shadow-sm">CIMB</div>
+                                <span class="font-bold text-sm text-gray-700">CIMB Niaga VA</span>
+                            </label>
+                            <label class="group flex items-center gap-3 p-4 border-2 rounded-2xl cursor-pointer hover:border-teal-500 hover:bg-teal-50 transition" :class="paymentMethod === 'va_bsi' ? 'border-teal-500 bg-teal-50' : 'border-gray-100'">
+                                <input type="radio" name="pay" value="va_bsi" x-model="paymentMethod" class="w-4 h-4 accent-teal-600">
+                                <div class="w-12 h-8 bg-bsi rounded text-white flex items-center justify-center text-xs font-bold shadow-sm">BSI</div>
+                                <span class="font-bold text-sm text-gray-700">BSI Syariah</span>
+                            </label>
+                            <label class="group flex items-center gap-3 p-4 border-2 rounded-2xl cursor-pointer hover:border-orange-400 hover:bg-orange-50 transition" :class="paymentMethod === 'va_danamon' ? 'border-orange-400 bg-orange-50' : 'border-gray-100'">
+                                <input type="radio" name="pay" value="va_danamon" x-model="paymentMethod" class="w-4 h-4 accent-orange-400">
+                                <div class="w-12 h-8 bg-danamon rounded text-white flex items-center justify-center text-[10px] font-bold shadow-sm">DNM</div>
+                                <span class="font-bold text-sm text-gray-700">Bank Danamon</span>
+                            </label>
                         </div>
-                    </div>
 
-                    <div class="space-y-3 text-sm text-gray-600 mb-6">
-                        <div class="flex justify-between">
-                            <span class="flex items-center gap-2">🧸 Subtotal Produk</span>
-                            <span class="font-bold" x-text="formatRupiah(amount)"></span>
+                        <div x-show="category === 'ewallet'" class="space-y-4" x-transition>
+                            <div class="grid grid-cols-2 md:grid-cols-3 gap-4">
+                                <label class="border-2 rounded-2xl p-4 cursor-pointer hover:border-orange-500 hover:bg-orange-50 transition relative" :class="paymentMethod === 'shopeepay' ? 'border-orange-500 bg-orange-50' : 'border-gray-100'">
+                                    <input type="radio" name="pay" value="shopeepay" x-model="paymentMethod" class="hidden">
+                                    <div class="flex flex-col items-center gap-2">
+                                        <div class="w-10 h-10 bg-orange-600 rounded-lg flex items-center justify-center text-white text-[10px] font-bold">SP</div>
+                                        <span class="font-bold text-xs text-gray-700">ShopeePay</span>
+                                    </div>
+                                    <div x-show="paymentMethod === 'shopeepay'" class="absolute top-2 right-2 text-orange-600 font-bold">✓</div>
+                                </label>
+                                <label class="border-2 rounded-2xl p-4 cursor-pointer hover:border-green-500 hover:bg-green-50 transition relative" :class="paymentMethod === 'gopay' ? 'border-green-500 bg-green-50' : 'border-gray-100'">
+                                    <input type="radio" name="pay" value="gopay" x-model="paymentMethod" class="hidden">
+                                    <div class="flex flex-col items-center gap-2">
+                                        <div class="w-10 h-10 bg-green-600 rounded-lg flex items-center justify-center text-white text-[10px] font-bold">GO</div>
+                                        <span class="font-bold text-xs text-gray-700">GoPay</span>
+                                    </div>
+                                    <div x-show="paymentMethod === 'gopay'" class="absolute top-2 right-2 text-green-600 font-bold">✓</div>
+                                </label>
+                                <label class="border-2 rounded-2xl p-4 cursor-pointer hover:border-purple-500 hover:bg-purple-50 transition relative" :class="paymentMethod === 'ovo' ? 'border-purple-500 bg-purple-50' : 'border-gray-100'">
+                                    <input type="radio" name="pay" value="ovo" x-model="paymentMethod" class="hidden">
+                                    <div class="flex flex-col items-center gap-2">
+                                        <div class="w-10 h-10 bg-purple-600 rounded-lg flex items-center justify-center text-white text-[10px] font-bold">OVO</div>
+                                        <span class="font-bold text-xs text-gray-700">OVO</span>
+                                    </div>
+                                    <div x-show="paymentMethod === 'ovo'" class="absolute top-2 right-2 text-purple-600 font-bold">✓</div>
+                                </label>
+                                <label class="border-2 rounded-2xl p-4 cursor-pointer hover:border-blue-400 hover:bg-blue-50 transition relative" :class="paymentMethod === 'dana' ? 'border-blue-400 bg-blue-50' : 'border-gray-100'">
+                                    <input type="radio" name="pay" value="dana" x-model="paymentMethod" class="hidden">
+                                    <div class="flex flex-col items-center gap-2">
+                                        <div class="w-10 h-10 bg-blue-400 rounded-lg flex items-center justify-center text-white text-[10px] font-bold">DN</div>
+                                        <span class="font-bold text-xs text-gray-700">DANA</span>
+                                    </div>
+                                    <div x-show="paymentMethod === 'dana'" class="absolute top-2 right-2 text-blue-500 font-bold">✓</div>
+                                </label>
+                                <label class="border-2 rounded-2xl p-4 cursor-pointer hover:border-red-500 hover:bg-red-50 transition relative" :class="paymentMethod === 'linkaja' ? 'border-red-500 bg-red-50' : 'border-gray-100'">
+                                    <input type="radio" name="pay" value="linkaja" x-model="paymentMethod" class="hidden">
+                                    <div class="flex flex-col items-center gap-2">
+                                        <div class="w-10 h-10 bg-red-600 rounded-lg flex items-center justify-center text-white text-[10px] font-bold">LA</div>
+                                        <span class="font-bold text-xs text-gray-700">LinkAja</span>
+                                    </div>
+                                    <div x-show="paymentMethod === 'linkaja'" class="absolute top-2 right-2 text-red-600 font-bold">✓</div>
+                                </label>
+                                <label class="border-2 rounded-2xl p-4 cursor-pointer hover:border-orange-400 hover:bg-orange-50 transition relative" :class="paymentMethod === 'jenius' ? 'border-orange-400 bg-orange-50' : 'border-gray-100'">
+                                    <input type="radio" name="pay" value="jenius" x-model="paymentMethod" class="hidden">
+                                    <div class="flex flex-col items-center gap-2">
+                                        <div class="w-10 h-10 bg-orange-400 rounded-lg flex items-center justify-center text-white text-[10px] font-bold">JP</div>
+                                        <span class="font-bold text-xs text-gray-700">Jenius Pay</span>
+                                    </div>
+                                    <div x-show="paymentMethod === 'jenius'" class="absolute top-2 right-2 text-orange-600 font-bold">✓</div>
+                                </label>
+                            </div>
                         </div>
-                        
-                        <div class="flex justify-between">
-                            <span class="flex items-center gap-2">📦 Biaya Pengiriman</span>
-                            <span class="font-bold text-gray-800" x-text="formatRupiah(shippingFee)"></span>
+
+                        <div x-show="category === 'offline'" class="space-y-4" x-transition>
+                            <div class="grid grid-cols-2 gap-4">
+                                <label class="border-2 rounded-2xl p-4 cursor-pointer hover:border-red-600 hover:bg-red-50 transition" :class="paymentMethod === 'alfa' ? 'border-red-600 bg-red-50' : 'border-gray-100'">
+                                    <input type="radio" name="pay" value="alfa" x-model="paymentMethod" class="hidden">
+                                    <div class="font-black text-red-600 text-sm">ALFAMART</div>
+                                </label>
+                                <label class="border-2 rounded-2xl p-4 cursor-pointer hover:border-blue-600 hover:bg-blue-50 transition" :class="paymentMethod === 'indo' ? 'border-blue-600 bg-blue-50' : 'border-gray-100'">
+                                    <input type="radio" name="pay" value="indo" x-model="paymentMethod" class="hidden">
+                                    <div class="font-black text-blue-600 text-sm">INDOMARET</div>
+                                </label>
+                                <label class="border-2 rounded-2xl p-4 cursor-pointer hover:border-red-400 hover:bg-red-50 transition" :class="paymentMethod === 'alfamidi' ? 'border-red-400 bg-red-50' : 'border-gray-100'">
+                                    <input type="radio" name="pay" value="alfamidi" x-model="paymentMethod" class="hidden">
+                                    <div class="font-black text-red-500 text-sm">ALFAMIDI</div>
+                                </label>
+                                <label class="border-2 rounded-2xl p-4 cursor-pointer hover:border-blue-400 hover:bg-blue-50 transition" :class="paymentMethod === 'lawson' ? 'border-blue-400 bg-blue-50' : 'border-gray-100'">
+                                    <input type="radio" name="pay" value="lawson" x-model="paymentMethod" class="hidden">
+                                    <div class="font-black text-blue-400 text-sm">LAWSON</div>
+                                </label>
+                                <label class="border-2 rounded-2xl p-4 cursor-pointer hover:border-orange-400 hover:bg-orange-50 transition" :class="paymentMethod === 'dandan' ? 'border-orange-400 bg-orange-50' : 'border-gray-100'">
+                                    <input type="radio" name="pay" value="dandan" x-model="paymentMethod" class="hidden">
+                                    <div class="font-black text-orange-500 text-sm">DAN+DAN</div>
+                                </label>
+                            </div>
                         </div>
-                    </div>
 
-                    <div class="flex justify-between font-extrabold text-xl text-gray-900 pt-4 border-t border-dashed border-gray-300">
-                        <span>Total Tagihan ✨</span>
-                        <span class="text-orange-600 text-2xl font-display" x-text="formatRupiah(totalDue)"></span>
-                    </div>
-                    <button @click="processPayment()" class="w-full bg-orange-600 hover:bg-orange-700 text-white font-bold py-3 mt-6 rounded-xl shadow-lg transform active:scale-95 transition flex justify-center items-center gap-2">
-                        <span>🔒</span> Bayar Sekarang
-                    </button>
-                    
-                    <div class="mt-4 text-center">
-                        <a href="{{ route('checkout') }}" class="text-xs text-gray-400 hover:text-orange-600 font-bold underline">Ubah Pengiriman</a>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div x-show="step === 2" class="fixed inset-0 bg-white/90 backdrop-blur-sm flex items-center justify-center z-50" x-cloak>
-            <div class="text-center">
-                <div class="loader mx-auto mb-4"></div>
-                <p class="font-bold text-gray-700 text-lg animate-pulse">Menghubungkan ke Payment Gateway...</p>
-                <p class="text-sm text-gray-400">Mohon jangan tutup halaman ini.</p>
-            </div>
-        </div>
-
-        <div x-show="step === 3" class="max-w-3xl mx-auto mt-8" x-cloak x-transition>
-            
-            <div class="text-center mb-8">
-                <div class="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4 text-3xl shadow-sm">✅</div>
-                <h2 class="text-2xl font-extrabold text-gray-800">Menunggu Pembayaran</h2>
-                
-                <p class="text-gray-500">Selesaikan pembayaran dalam <span class="font-bold text-orange-600 font-mono text-lg" x-text="timerDisplay"></span></p>
-            </div>
-
-            <div class="bg-white rounded-3xl shadow-xl border border-gray-100 overflow-hidden">
-                
-                <template x-if="paymentMethod.includes('va')">
-                    <div class="p-8">
-                        <div class="flex justify-between items-center mb-6 pb-6 border-b border-gray-100">
+                        <div x-show="category === 'cod'" x-transition class="h-full flex items-center justify-center p-8 text-center">
                             <div>
-                                <p class="text-sm text-gray-500 mb-1">Metode Pembayaran</p>
-                                <h3 class="font-bold text-lg flex items-center gap-2 uppercase" x-text="paymentMethod.replace('va_', '') + ' Virtual Account'"></h3>
+                                <div class="w-20 h-20 bg-orange-100 rounded-full flex items-center justify-center text-4xl mx-auto mb-4">📦</div>
+                                <h3 class="font-bold text-gray-800 text-lg">Bayar Di Tempat</h3>
+                                <p class="text-sm text-gray-500 mb-6">Bayar tunai kepada kurir saat paket sampai.</p>
+                                <label class="inline-block bg-white border-2 border-orange-500 text-orange-600 px-8 py-3 rounded-xl font-bold cursor-pointer hover:bg-orange-50 transition shadow-sm">
+                                    <input type="radio" name="pay" value="cod" x-model="paymentMethod" class="hidden">
+                                    <span>Pilih COD</span>
+                                </label>
+                                <div x-show="paymentMethod === 'cod'" class="mt-4 text-green-600 text-sm font-bold bg-green-50 px-4 py-2 rounded-full inline-block">✓ Siap Dikirim</div>
                             </div>
-                        </div>
-
-                        <div class="bg-blue-50 rounded-2xl p-6 mb-8 border border-blue-100">
-                            <p class="text-sm text-gray-500 mb-2 font-bold uppercase">Nomor Virtual Account</p>
-                            <div class="flex justify-between items-center">
-                                <span class="text-3xl font-mono font-extrabold text-blue-800 tracking-widest" x-text="vaNumber"></span>
-                                <button @click="copyToClipboard(vaNumber)" class="text-sm font-bold text-blue-600 hover:text-blue-800 hover:bg-blue-100 px-3 py-1 rounded transition">SALIN</button>
-                            </div>
-                            <div class="mt-4 pt-4 border-t border-blue-200 flex justify-between">
-                                <span class="font-bold text-gray-700">Total Bayar</span>
-                                <span class="font-extrabold text-orange-600 text-xl" x-text="formatRupiah(totalDue)"></span>
-                            </div>
-                        </div>
-
-                        <div class="space-y-4">
-                            <h4 class="font-bold text-gray-800">Cara Pembayaran:</h4>
-                            <ol class="list-decimal pl-5 space-y-2 text-sm text-gray-600">
-                                <li>Buka aplikasi M-Banking atau ke ATM.</li>
-                                <li>Pilih menu <b>Transfer</b> > <b>Virtual Account</b>.</li>
-                                <li>Masukkan nomor VA di atas: <b x-text="vaNumber"></b>.</li>
-                                <li>Periksa nama penerima: <b>Build-A-Teddy</b>.</li>
-                                <li>Masukkan PIN Anda dan selesai.</li>
-                            </ol>
                         </div>
                     </div>
-                </template>
 
-                <template x-if="!paymentMethod.includes('va') && !['alfa', 'indo', 'alfamidi'].includes(paymentMethod)">
-                    <div class="p-8 text-center">
-                        <h3 class="font-bold text-lg mb-2">Scan QR Code</h3>
-                        <p class="text-sm text-gray-500 mb-6">Buka aplikasi E-Wallet pilihanmu untuk bayar.</p>
-                        
-                        <div class="w-64 h-64 bg-gray-800 mx-auto rounded-xl flex items-center justify-center text-white shadow-lg mb-6 relative group">
-                            <div class="absolute inset-2 bg-white p-2 rounded-lg">
-                                <div class="w-full h-full bg-[url('https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=BuildATeddyPayment')] bg-cover"></div>
-                            </div>
-                            <div class="absolute bg-white p-1 rounded-full shadow-md">
-                                <span class="text-xl">🧸</span>
-                            </div>
-                        </div>
-
-                        <div class="bg-gray-200 inline-block px-6 py-3 rounded-xl border border-gray-300">
-                            <p class="font-bold text-gray-800 text-lg" x-text="formatRupiah(totalDue)"></p>
-                        </div>
-                    </div>
-                </template>
-
-                <template x-if="['alfa', 'indo', 'alfamidi'].includes(paymentMethod)">
-                    <div class="p-8">
-                        <div class="flex justify-between items-center mb-6">
-                            <h3 class="font-bold text-lg">Bayar di Kasir</h3>
-                            <div class="bg-red-600 text-white font-bold px-3 py-1 text-xs rounded uppercase" x-text="paymentMethod"></div>
-                        </div>
-
-                        <div class="bg-gray-100 rounded-2xl p-6 mb-6 text-center border-2 border-dashed border-gray-300">
-                            <p class="text-sm text-gray-500 mb-2 uppercase tracking-wide">Kode Pembayaran</p>
-                            <h2 class="text-4xl font-mono font-extrabold text-gray-800 tracking-widest" x-text="vaNumber"></h2>
-                        </div>
-
-                        <div class="space-y-2 text-sm text-gray-600 bg-yellow-50 p-4 rounded-xl border border-yellow-100">
-                            <p>1. Datang ke gerai terdekat.</p>
-                            <p>2. Bilang ke kasir: <b>"Bayar Merchant Build-A-Teddy"</b>.</p>
-                            <p>3. Tunjukkan kode pembayaran di atas.</p>
-                            <p>4. Bayar sebesar <b x-text="formatRupiah(totalDue)"></b>.</p>
-                            <p>5. Simpan struk sebagai bukti pembayaran.</p>
-                        </div>
-                    </div>
-                </template>
-
-                <div class="bg-gray-50 p-6 border-t border-gray-100 flex justify-between items-center">
-                    <div class="text-xs text-gray-400">
-                        <p>Order ID: #TRX-882910</p>
-                        <p>Tanggal: {{ date('d M Y') }}</p>
-                    </div>
-                    <div class="flex gap-3">
-                        <button class="text-gray-500 font-bold hover:text-gray-700 text-sm px-4 py-2">Bantuan</button>
-                        <a href="{{ route('history') }}" class="bg-gray-900 text-white px-6 py-2.5 rounded-xl font-bold shadow hover:bg-gray-800 transition">
-                            Cek Status Pesanan
-                        </a>
+                    <div class="p-6 border-t border-gray-100 bg-gray-50 flex justify-end">
+                        <button @click="processPayment()" class="bg-gray-900 text-white px-8 py-3.5 rounded-xl font-bold shadow-lg hover:bg-gray-800 hover:-translate-y-0.5 transition flex items-center gap-2">
+                            <span x-text="paymentMethod === 'cod' ? 'Pesan Sekarang' : 'Bayar Sekarang'"></span>
+                            <span>➔</span>
+                        </button>
                     </div>
                 </div>
             </div>
-            
-            <div class="text-center mt-8">
-                <a href="{{ url('/') }}" class="text-gray-400 hover:text-orange-600 font-bold text-sm">Kembali ke Beranda</a>
-            </div>
+        </div>
 
+        <div x-show="step === 2" class="fixed inset-0 bg-white/95 backdrop-blur-sm flex items-center justify-center z-[100]" x-cloak x-transition.opacity>
+            <div class="text-center">
+                <div class="loader mx-auto mb-6"></div>
+                <h3 class="text-2xl font-black text-gray-800 mb-2">Memproses...</h3>
+                <p class="text-gray-500 text-sm">Mohon tunggu sebentar.</p>
+            </div>
+        </div>
+
+        <div x-show="step === 3" class="max-w-xl mx-auto mt-8 pb-20" x-cloak x-transition>
+            
+            <div class="bg-white rounded-[2.5rem] shadow-2xl shadow-gray-200 border border-white overflow-hidden relative text-center">
+                <div class="bg-gray-50 py-8 border-b border-gray-100">
+                    <div class="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4 text-4xl shadow-sm border-4 border-white animate-bounce text-green-600" x-text="paymentMethod === 'cod' ? '📦' : '✅'"></div>
+                    <h2 class="text-3xl font-black text-gray-800 mb-2" x-text="paymentMethod === 'cod' ? 'Pesanan Berhasil' : 'Menunggu Pembayaran'"></h2>
+                    
+                    <div x-show="paymentMethod !== 'cod'" class="inline-flex items-center gap-2 bg-white text-orange-600 px-4 py-1.5 rounded-full border border-orange-100 font-mono font-bold shadow-sm text-sm">
+                        <span>⏱️</span> <span x-text="timerDisplay"></span>
+                    </div>
+                </div>
+                
+                <div class="p-10">
+                    <template x-if="paymentMethod.includes('va') || ['alfa','indo','alfamidi','lawson','dandan'].includes(paymentMethod)">
+                        <div class="bg-blue-50 border border-blue-100 rounded-2xl p-8 relative">
+                            <p class="text-xs font-bold text-blue-400 uppercase tracking-widest mb-3">Kode Pembayaran</p>
+                            <span class="text-4xl font-mono font-black text-blue-900 tracking-widest block mb-6" x-text="vaNumber"></span>
+                            <button @click="copyToClipboard(vaNumber)" class="text-xs font-bold bg-white text-blue-600 border border-blue-200 px-6 py-2.5 rounded-full hover:bg-blue-600 hover:text-white transition shadow-sm">SALIN KODE</button>
+                        </div>
+                    </template>
+
+                    <template x-if="!paymentMethod.includes('va') && !['alfa','indo','alfamidi','lawson','dandan','cod'].includes(paymentMethod)">
+                         <div>
+                            <p class="text-xs font-bold text-gray-400 uppercase tracking-widest mb-4">Scan QR Code</p>
+                            <div class="bg-white p-3 rounded-2xl shadow-lg border-2 border-gray-800 inline-block mx-auto">
+                                <img src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=BuildATeddyPayment" class="rounded-xl">
+                            </div>
+                        </div>
+                    </template>
+
+                    <template x-if="paymentMethod === 'cod'">
+                        <div>
+                             <div class="bg-orange-50 p-6 rounded-2xl border border-orange-100 inline-block w-full text-center">
+                                <p class="text-sm font-bold text-orange-800 mb-2">Terima kasih!</p>
+                                <p class="text-gray-600 text-sm">Pesananmu sedang disiapkan. Harap siapkan uang tunai pas saat kurir datang.</p>
+                             </div>
+                        </div>
+                    </template>
+                </div>
+
+                <div class="bg-gray-900 p-4 text-center cursor-pointer hover:bg-gray-800 transition">
+                    <a href="{{ route('history') }}" class="text-white font-bold block w-full h-full py-2">Cek Status Pesanan</a>
+                </div>
+            </div>
+            
+            <div class="text-center mt-6">
+                <a href="{{ url('/') }}" class="text-sm font-bold text-gray-400 hover:text-gray-600">Kembali ke Beranda</a>
+            </div>
         </div>
 
     </div>
