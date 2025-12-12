@@ -5,13 +5,21 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Lokasi Store - Malang</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&family=Nunito:wght@400;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&family=Nunito:wght@400;700;800;900&display=swap" rel="stylesheet">
     <style>
         body { font-family: 'Nunito', sans-serif; background-color: #FFFBF5; }
         h1, h2, h3, .font-display { font-family: 'Fredoka', sans-serif; }
     </style>
     <script>
-        tailwind.config = { theme: { extend: { colors: { orange: { 600: '#ea580c' } } } } }
+        tailwind.config = { 
+            theme: { 
+                extend: { 
+                    colors: { 
+                        orange: { 100: '#ffedd5', 600: '#ea580c', 700: '#c2410c' } 
+                    } 
+                } 
+            } 
+        }
     </script>
 </head>
 <body class="text-gray-800">
@@ -55,9 +63,13 @@
                 </div>
 
                 <div class="mt-8 pt-6 border-t border-gray-100">
-                    <button class="w-full bg-orange-600 text-white font-bold py-3 rounded-xl shadow-md hover:bg-orange-700 transition">
-                        Petunjuk Arah (Google Maps)
-                    </button>
+                    <a 
+                        href="https://maps.google.com/?q=Jl.+Ijen+Besar+No.+88,+Klojen,+Kota+Malang" 
+                        target="_blank" 
+                        class="w-full block text-center bg-orange-600 text-white font-bold py-3 rounded-xl shadow-md hover:bg-orange-700 transition"
+                    >
+                        Petunjuk Arah (Google Maps) 🗺️
+                    </a>
                 </div>
             </div>
         </div>

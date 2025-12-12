@@ -99,6 +99,12 @@ Route::middleware(['auth'])->group(function () {
 // --- 4. ADMIN SIDE ---
 Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->group(function () {
     Route::get('/dashboard', function () { return view('admin.dashboard'); })->name('dashboard');
+    
+    // [BARU] Kelola User
+    Route::get('/users', function () { return view('admin.users'); })->name('users');
+    
+    // [BARU] Kelola Toko (List Semua Toko)
+    Route::get('/stores', function () { return view('admin.stores'); })->name('stores');
 });
 
 require __DIR__.'/auth.php';

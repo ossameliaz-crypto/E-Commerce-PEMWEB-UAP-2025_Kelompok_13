@@ -45,7 +45,7 @@
                 <h3 class="text-xl font-display font-bold text-gray-800 mb-4 flex items-center gap-3"><span class="text-3xl text-blue-600">2.</span> Syarat Kondisi Produk</h3>
                 <ul class="list-disc list-inside space-y-2 text-gray-600 leading-relaxed pl-4">
                     <li>Produk harus dalam kondisi baru (belum pernah dicuci atau digunakan).</li>
-                    <li>Label harga dan tag Build-A-Teddy harus **masih terpasang**.</li>
+                    <li>Label harga dan tag Build-A-Teddy harus masih terpasang.</li>
                     <li>Untuk boneka yang dikustomisasi suara, pengembalian dana tidak berlaku jika kesalahan berasal dari rekaman suara pelanggan.</li>
                 </ul>
             </div>
@@ -53,7 +53,7 @@
             <div class="bg-white p-8 rounded-3xl shadow-xl border-l-8 border-green-500/80 hover:shadow-2xl transition duration-300">
                 <h3 class="text-xl font-display font-bold text-gray-800 mb-4 flex items-center gap-3"><span class="text-3xl text-green-600">3.</span> Prosedur Pengajuan</h3>
                 <ol class="list-decimal list-inside space-y-2 text-gray-600 leading-relaxed pl-4">
-                    <li>Hubungi Customer Service kami melalui `{{ route('contact') }}`.</li>
+                    <li>Hubungi Customer Service kami melalui Telp: (0341) 577-911 help@buildateddy.id.</li>
                     <li>Sertakan Nomor Order dan Bukti Video/Foto produk yang bermasalah.</li>
                     <li>Tim kami akan memproses dan memberikan alamat pengembalian dalam waktu 24 jam.</li>
                 </ol>

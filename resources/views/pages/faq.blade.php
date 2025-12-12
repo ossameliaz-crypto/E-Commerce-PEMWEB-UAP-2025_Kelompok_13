@@ -63,7 +63,7 @@
                 </button>
                 <div x-show="open" x-collapse.duration.500ms class="px-6 pb-6 text-gray-600 border-t border-gray-100">
                     <p class="leading-relaxed pt-4">
-                        Proses perakitan dan *quality check* memerlukan waktu 1 hari kerja. Pengiriman reguler (JNE/J&T) memakan waktu 3-5 hari ke seluruh Indonesia. Anda bisa melacaknya di halaman **Lacak Pesanan**.
+                        Proses perakitan dan quality check memerlukan waktu 1 hari kerja. Pengiriman reguler (JNE/J&T) memakan waktu 3-5 hari ke seluruh Indonesia. Anda bisa melacaknya di halaman Lacak Pesanan.
                     </p>
                 </div>
             </div>
